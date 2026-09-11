@@ -9,6 +9,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Pro Runner">
   <meta name="format-detection" content="telephone=no">
+  <meta name="app-version" content="1.1.0">
+  <meta name="app-build" content="2026-09-11.1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>Pro Runner</title>
   <meta name="description" content="A local-first runtime and workspace for static web applications.">
@@ -52,6 +54,7 @@
             <button id="workspaceViewButton" class="active" type="button">Workspace</button>
             <button id="homeViewButton" type="button">Home</button>
           </div>
+          <button id="updateStatusButton" class="update-status hidden" type="button" aria-label="Software update available"><span class="update-status-dot" aria-hidden="true"></span><span id="updateStatusText">Update available</span></button>
           <button id="settingsButton" class="icon-button" type="button" aria-label="Settings">⚙︎</button>
         </div>
       </header>
@@ -166,9 +169,40 @@
           <label class="toggle-row"><span><strong>Compatibility layer</strong><small>Enable for newly imported projects.</small></span><input id="defaultCompatToggle" type="checkbox" role="switch"></label>
           <label class="toggle-row"><span><strong>Diagnostics</strong><small>Enable the runtime bridge for newly imported projects.</small></span><input id="defaultDebugToggle" type="checkbox" role="switch"></label>
         </section>
+        <section id="softwareUpdateGroup" class="settings-group"><h3>Software update</h3>
+          <div class="software-update-card">
+            <div class="software-update-versions">
+              <div><span>Installed</span><strong id="installedVersionValue">1.1.0</strong></div>
+              <div><span>Latest</span><strong id="latestVersionValue">Not checked</strong></div>
+            </div>
+            <p id="updateCheckStatus" class="software-update-status">Update status has not been checked yet.</p>
+            <div class="software-update-meta">Last checked: <span id="lastUpdateCheck">Never</span></div>
+            <label class="toggle-row software-update-toggle"><span><strong>Automatic update checks</strong><small>Check for new Pro Runner releases when the app starts and when connectivity returns.</small></span><input id="autoUpdateChecksToggle" type="checkbox" role="switch" checked></label>
+            <div class="software-update-actions">
+              <button id="checkUpdateButton" class="subtle-button" type="button">Check for updates</button>
+              <button id="skipUpdateButton" class="text-button hidden" type="button">Skip this version</button>
+              <button id="installUpdateButton" class="primary-button hidden" type="button">Install update</button>
+            </div>
+          </div>
+        </section>
         <section class="settings-group"><h3>Storage</h3><div id="storageSummary" class="storage-summary">Calculating…</div><button id="clearAllButton" class="danger-button full" type="button">Remove all local projects and settings</button></section>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="updateDialog" class="modal update-modal">
+    <div class="modal-card update-dialog-card">
+      <div class="update-dialog-mark" aria-hidden="true">↑</div>
+      <span class="eyebrow">SOFTWARE UPDATE</span>
+      <h2 id="updateDialogTitle">Update available</h2>
+      <div id="updateDialogVersion" class="update-dialog-version">Version —</div>
+      <p id="updateDialogCopy" class="update-dialog-copy">A new Pro Runner version is available.</p>
+      <div class="update-dialog-actions">
+        <button id="updateDialogInstall" class="primary-button full" type="button">Update now</button>
+        <button id="updateDialogLater" class="subtle-button full" type="button">Not now</button>
+        <button id="updateDialogSkip" class="text-button full" type="button">Skip this version</button>
+      </div>
+    </div>
   </dialog>
 
   <dialog id="diagnosticsDialog" class="modal diagnostics-modal">
@@ -183,5 +217,6 @@
 
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./update-ui.js"></script>
 </body>
 </html>

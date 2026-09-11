@@ -1,4 +1,4 @@
-const SHELL_VERSION = '1.0.0';
+const SHELL_VERSION = '1.1.0';
 const CACHE_NAME = `pro-runner-shell-${SHELL_VERSION}`;
 const DB_NAME = 'pro-runner-v1';
 const DB_VERSION = 1;
@@ -9,7 +9,7 @@ const ASSET_STORE = 'assets';
 const VIRTUAL_PREFIX = '__site/';
 
 const SHELL_ASSETS = [
-  './', './index.html', './styles.css', './app.js', './bridge.js',
+  './', './index.html', './styles.css', './app.js', './bridge.js', './update-ui.js',
   './manifest.webmanifest', './zip.js', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
 ];
 
@@ -17,7 +17,6 @@ self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     await cache.addAll(SHELL_ASSETS);
-    await self.skipWaiting();
   })());
 });
 
@@ -32,6 +31,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data?.type === 'GET_VERSION' && event.ports?.[0]) event.ports[0].postMessage({ version:SHELL_VERSION });
 });
 
 function openDB() {
@@ -292,6 +292,18 @@ async function broadcast(message) {
   for (const client of clients) client.postMessage(message);
 }
 
+async function networkVersionResponse(request) {
+  try {
+    const response = await fetch(request, { cache:'no-store' });
+    if (!response.ok) return response;
+    const headers = new Headers(response.headers);
+    headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return new Response(response.body, { status:response.status, statusText:response.statusText, headers });
+  } catch {
+    return new Response(JSON.stringify({ error:'offline' }), { status:503, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'} });
+  }
+}
+
 async function shellResponse(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request, { ignoreSearch:true });
@@ -317,6 +329,11 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
   const scopePath = new URL(self.registration.scope).pathname;
+  const versionPath = new URL('./version.json', self.registration.scope).pathname;
+  if (url.pathname === versionPath) {
+    event.respondWith(networkVersionResponse(event.request));
+    return;
+  }
   const prefix = `${scopePath}${VIRTUAL_PREFIX}`;
   if (url.pathname.startsWith(prefix)) {
     const remainder = url.pathname.slice(prefix.length);

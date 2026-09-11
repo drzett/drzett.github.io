@@ -1,0 +1,7 @@
+{
+  "version": "1.1.0",
+  "build": "2026-09-11.1",
+  "channel": "stable",
+  "released": "2026-09-11T10:58:00Z",
+  "summary": "Adds a staged in-app software update flow with manual checks, automatic checks, deferral, version skipping, and safe restart installation."
+}
