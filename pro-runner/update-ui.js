@@ -1,1 +1,15 @@
-const releaseVersion='1.4.1';const releaseBuild='2026-09-11.6';const vm=document.querySelector('meta[name="app-version"]'),bm=document.querySelector('meta[name="app-build"]');if(vm)vm.content=releaseVersion;if(bm)bm.content=releaseBuild;const installed=document.getElementById('installedVersionValue');if(installed)installed.textContent=releaseVersion;(async()=>{await import('./update-ui-core.js');await import('./springboard-v14.js');await import('./v141-ui.js');await import('./v141-icons.js');await import('./v141-touch.js')})().catch(error=>console.error('Pro Runner patch bootstrap failed.',error));
+const releaseVersion='1.4.2';
+const releaseBuild='2026-09-12.1';
+const versionMeta=document.querySelector('meta[name="app-version"]');
+const buildMeta=document.querySelector('meta[name="app-build"]');
+if(versionMeta)versionMeta.content=releaseVersion;
+if(buildMeta)buildMeta.content=releaseBuild;
+const installed=document.getElementById('installedVersionValue');
+if(installed)installed.textContent=releaseVersion;
+(async()=>{
+  await import('./update-ui-core.js');
+  await import('./springboard-v14.js');
+  await import('./v142-ui.js');
+  await import('./icon-designer.js');
+  await import('./v141-touch.js');
+})().catch(error=>console.error('Pro Runner patch bootstrap failed.',error));
