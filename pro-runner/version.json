@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "build": "2026-09-11.1",
+  "version": "1.2.0",
+  "build": "2026-09-11.2",
   "channel": "stable",
-  "released": "2026-09-11T10:58:00Z",
-  "summary": "Adds a staged in-app software update flow with manual checks, automatic checks, deferral, version skipping, and safe restart installation."
+  "released": "2026-09-11",
+  "summary": "Promotes the staged in-app updater and refined Home mode layout as a stable release, providing a clean upgrade path from 1.1.0."
 }
