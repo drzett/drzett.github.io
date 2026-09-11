@@ -1,4 +1,4 @@
-const SHELL_VERSION = '1.1.0';
+const SHELL_VERSION = '1.2.0';
 const CACHE_NAME = `local-html-runner-shell-${SHELL_VERSION}`;
 const DB_NAME = 'local-html-runner-v1';
 const DB_VERSION = 1;
@@ -32,12 +32,9 @@ self.addEventListener('activate', (event) => {
         .filter((key) => key.startsWith('local-html-runner-shell-') && key !== CACHE_NAME)
         .map((key) => caches.delete(key)),
     );
-
     await self.clients.claim();
     const clients = await self.clients.matchAll({ type: 'window' });
-    for (const client of clients) {
-      client.postMessage({ type: 'RUNNER_SW_READY', version: SHELL_VERSION });
-    }
+    for (const client of clients) client.postMessage({ type: 'RUNNER_SW_READY', version: SHELL_VERSION });
   })());
 });
 
@@ -54,7 +51,8 @@ function openDB() {
       if (!db.objectStoreNames.contains(META_STORE)) db.createObjectStore(META_STORE, { keyPath: 'key' });
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(request.error || new Error('Unable to open local storage.'));
+    request.onblocked = () => reject(new Error('Local storage is blocked.'));
   });
 }
 
@@ -64,69 +62,58 @@ async function dbGet(storeName, key) {
     const tx = db.transaction(storeName, 'readonly');
     const request = tx.objectStore(storeName).get(key);
     request.onsuccess = () => resolve(request.result?.value ?? request.result ?? null);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(request.error || new Error('Unable to read local storage.'));
     tx.oncomplete = () => db.close();
+    tx.onabort = () => db.close();
   });
 }
 
 function normalizePath(path) {
   const output = [];
-
   for (const raw of String(path || '').replaceAll('\\', '/').split('/')) {
     const part = raw.trim();
     if (!part || part === '.') continue;
-    if (part === '..') {
-      if (output.length) output.pop();
-      continue;
-    }
+    if (part === '..') { if (output.length) output.pop(); continue; }
     output.push(part);
   }
-
   return output.join('/');
 }
 
 function mimeFromPath(path) {
   const ext = path.toLowerCase().split('.').pop();
   const map = {
-    html: 'text/html; charset=utf-8',
-    htm: 'text/html; charset=utf-8',
-    xhtml: 'application/xhtml+xml',
-    css: 'text/css; charset=utf-8',
-    js: 'text/javascript; charset=utf-8',
-    mjs: 'text/javascript; charset=utf-8',
-    json: 'application/json; charset=utf-8',
-    webmanifest: 'application/manifest+json; charset=utf-8',
-    map: 'application/json; charset=utf-8',
-    txt: 'text/plain; charset=utf-8',
-    md: 'text/markdown; charset=utf-8',
-    csv: 'text/csv; charset=utf-8',
-    xml: 'application/xml',
-    svg: 'image/svg+xml',
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    gif: 'image/gif',
-    webp: 'image/webp',
-    avif: 'image/avif',
-    ico: 'image/x-icon',
-    heic: 'image/heic',
-    woff: 'font/woff',
-    woff2: 'font/woff2',
-    ttf: 'font/ttf',
-    otf: 'font/otf',
-    mp3: 'audio/mpeg',
-    m4a: 'audio/mp4',
-    wav: 'audio/wav',
-    ogg: 'audio/ogg',
-    flac: 'audio/flac',
-    mp4: 'video/mp4',
-    webm: 'video/webm',
-    mov: 'video/quicktime',
-    wasm: 'application/wasm',
-    pdf: 'application/pdf',
+    html: 'text/html; charset=utf-8', htm: 'text/html; charset=utf-8', xhtml: 'application/xhtml+xml',
+    css: 'text/css; charset=utf-8', js: 'text/javascript; charset=utf-8', mjs: 'text/javascript; charset=utf-8',
+    json: 'application/json; charset=utf-8', webmanifest: 'application/manifest+json; charset=utf-8', map: 'application/json; charset=utf-8',
+    txt: 'text/plain; charset=utf-8', md: 'text/markdown; charset=utf-8', csv: 'text/csv; charset=utf-8', xml: 'application/xml',
+    svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', avif: 'image/avif', ico: 'image/x-icon', heic: 'image/heic',
+    woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', otf: 'font/otf',
+    mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac',
+    mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', wasm: 'application/wasm', pdf: 'application/pdf',
   };
-
   return map[ext] || 'application/octet-stream';
+}
+
+function recordBody(record) {
+  if (record?.bytes instanceof ArrayBuffer) return record.bytes;
+  if (ArrayBuffer.isView(record?.bytes)) return record.bytes;
+  return record?.blob || null;
+}
+
+function recordSize(record) {
+  if (record?.bytes instanceof ArrayBuffer) return record.bytes.byteLength;
+  if (ArrayBuffer.isView(record?.bytes)) return record.bytes.byteLength;
+  if (typeof record?.blob?.size === 'number') return record.blob.size;
+  return Number(record?.size) || 0;
+}
+
+function sliceRecord(record, start, endExclusive) {
+  if (record?.bytes instanceof ArrayBuffer) return record.bytes.slice(start, endExclusive);
+  if (ArrayBuffer.isView(record?.bytes)) {
+    return record.bytes.buffer.slice(record.bytes.byteOffset + start, record.bytes.byteOffset + endExclusive);
+  }
+  if (record?.blob && typeof record.blob.slice === 'function') return record.blob.slice(start, endExclusive);
+  return null;
 }
 
 function baseHeaders(record, path) {
@@ -141,15 +128,16 @@ function baseHeaders(record, path) {
 
 function rangeResponse(request, record, path) {
   const range = request.headers.get('Range');
-  if (!range || !record.blob || typeof record.blob.slice !== 'function') return null;
+  if (!range) return null;
+
+  const size = recordSize(record);
+  if (!size) return null;
 
   const match = /^bytes=(\d*)-(\d*)$/i.exec(range.trim());
   if (!match) return null;
 
-  const size = record.blob.size;
   let start;
   let end;
-
   if (match[1] === '' && match[2] !== '') {
     const suffixLength = Number(match[2]);
     if (!Number.isFinite(suffixLength) || suffixLength <= 0) return null;
@@ -161,22 +149,18 @@ function rangeResponse(request, record, path) {
   }
 
   if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start >= size || end < start) {
-    return new Response(null, {
-      status: 416,
-      headers: { 'Content-Range': `bytes */${size}` },
-    });
+    return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}` } });
   }
 
   end = Math.min(end, size - 1);
-  const chunk = record.blob.slice(start, end + 1);
+  const chunk = sliceRecord(record, start, end + 1);
+  if (chunk == null) return null;
+
   const headers = baseHeaders(record, path);
   headers.set('Content-Range', `bytes ${start}-${end}/${size}`);
   headers.set('Content-Length', String(end - start + 1));
 
-  return new Response(request.method === 'HEAD' ? null : chunk, {
-    status: 206,
-    headers,
-  });
+  return new Response(request.method === 'HEAD' ? null : chunk, { status: 206, headers });
 }
 
 async function resolveVirtualRecord(request, rawVirtualPath) {
@@ -190,18 +174,15 @@ async function resolveVirtualRecord(request, rawVirtualPath) {
 
   if (request.mode === 'navigate' || request.destination === 'document') {
     const project = await dbGet(META_STORE, 'project');
-
     if (!normalized && project?.entryPath) {
       const entry = await dbGet(FILE_STORE, project.entryPath);
       if (entry) return { record: entry, path: project.entryPath };
     }
-
     if (normalized && (requestedDirectory || !/\.[^/]+$/.test(normalized))) {
       const directoryIndexPath = `${normalized}/index.html`;
       const directoryIndex = await dbGet(FILE_STORE, directoryIndexPath);
       if (directoryIndex) return { record: directoryIndex, path: directoryIndexPath };
     }
-
     const settings = await dbGet(META_STORE, 'settings');
     if (settings?.spaFallback && project?.entryPath) {
       const fallback = await dbGet(FILE_STORE, project.entryPath);
@@ -214,15 +195,11 @@ async function resolveVirtualRecord(request, rawVirtualPath) {
 
 async function serveVirtual(request, virtualPath) {
   const resolved = await resolveVirtualRecord(request, virtualPath);
-
   if (!resolved) {
     const path = normalizePath(virtualPath);
     return new Response(`Local HTML Runner: file not found: ${path || '/'}`, {
       status: 404,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store',
-      },
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
     });
   }
 
@@ -230,24 +207,25 @@ async function serveVirtual(request, virtualPath) {
   const partial = rangeResponse(request, record, path);
   if (partial) return partial;
 
-  const headers = baseHeaders(record, path);
-  headers.set('Content-Length', String(record.blob?.size ?? record.size ?? 0));
+  const body = recordBody(record);
+  if (body == null) {
+    return new Response('Local HTML Runner: stored file data is unavailable.', {
+      status: 500,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
 
-  return new Response(request.method === 'HEAD' ? null : record.blob, {
-    status: 200,
-    headers,
-  });
+  const headers = baseHeaders(record, path);
+  headers.set('Content-Length', String(recordSize(record)));
+  return new Response(request.method === 'HEAD' ? null : body, { status: 200, headers });
 }
 
 async function shellResponse(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request, { ignoreSearch: true });
-
   if (cached) {
     fetch(request)
-      .then((response) => {
-        if (response?.ok && request.method === 'GET') cache.put(request, response.clone());
-      })
+      .then((response) => { if (response?.ok && request.method === 'GET') cache.put(request, response.clone()); })
       .catch(() => {});
     return cached;
   }
@@ -261,7 +239,6 @@ async function shellResponse(request) {
       const fallback = await cache.match('./index.html');
       if (fallback) return fallback;
     }
-
     return new Response('Offline and this resource is not available in the application cache.', {
       status: 503,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -281,13 +258,8 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith(virtualPrefix)) {
     const encoded = url.pathname.slice(virtualPrefix.length);
     let decoded;
-
-    try {
-      decoded = encoded.split('/').map(decodeURIComponent).join('/');
-    } catch {
-      decoded = encoded;
-    }
-
+    try { decoded = encoded.split('/').map(decodeURIComponent).join('/'); }
+    catch { decoded = encoded; }
     event.respondWith(serveVirtual(event.request, decoded));
     return;
   }
