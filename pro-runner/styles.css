@@ -14,6 +14,8 @@
   --shadow: 0 24px 80px rgba(0,0,0,.36);
   --radius: 22px;
   --wallpaper-dim: .18;
+  --wallpaper-overscan-x: clamp(24px, 7vw, 54px);
+  --wallpaper-overscan-y: clamp(64px, 11dvh, 132px);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, ui-sans-serif, system-ui, sans-serif;
   color-scheme: dark;
 }
@@ -102,8 +104,9 @@ button, [role="button"] { -webkit-tap-highlight-color: transparent; }
 .text-button { border: 0; background: transparent; color: var(--muted); padding-left: 4px; padding-right: 4px; }
 .full { width: 100%; }
 
-.home-screen { position: fixed; inset: 0; z-index: 100; overflow: hidden; color: white; user-select: none; -webkit-user-select: none; }
-.wallpaper { position: absolute; inset: -2px; background: radial-gradient(circle at 25% 20%, #6a7084 0, #30343d 29%, #111318 69%, #090a0c 100%); background-size: cover; background-position: center; transform: scale(1.01); }
+html:has(.home-screen:not(.hidden)), body:has(.home-screen:not(.hidden)) { width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; background: #090a0c; }
+.home-screen { position: fixed; inset: 0; width: 100vw; min-height: 100vh; min-height: 100dvh; z-index: 100; overflow: hidden; overscroll-behavior: none; isolation: isolate; background: #090a0c; color: white; user-select: none; -webkit-user-select: none; }
+.wallpaper { position: absolute; z-index: 0; top: calc(-1 * var(--wallpaper-overscan-y)); bottom: calc(-1 * var(--wallpaper-overscan-y)); left: calc(-1 * var(--wallpaper-overscan-x)); right: calc(-1 * var(--wallpaper-overscan-x)); background: radial-gradient(circle at 25% 20%, #6a7084 0, #30343d 29%, #111318 69%, #090a0c 100%); background-size: cover; background-position: 50% 50%; background-repeat: no-repeat; transform: translateZ(0); transform-origin: center center; will-change: transform; pointer-events: none; }
 .home-scrim { position: absolute; inset: 0; background: rgba(0,0,0,var(--wallpaper-dim)); pointer-events: none; }
 .phone-status { position: relative; z-index: 2; height: calc(48px + env(safe-area-inset-top)); padding: max(14px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) 0 max(22px, env(safe-area-inset-left)); display: flex; align-items: flex-start; justify-content: space-between; font-size: 14px; font-weight: 650; letter-spacing: -.02em; text-shadow: 0 1px 4px rgba(0,0,0,.35); }
 .status-symbols { display: flex; align-items: center; gap: 7px; height: 14px; }
