@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#0b0c0e">
+  <meta name="color-scheme" content="dark light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pro Runner">
+  <meta name="format-detection" content="telephone=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Pro Runner</title>
+  <meta name="description" content="A local-first runtime and workspace for static web applications.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <noscript><div class="fatal">JavaScript is required to use this application.</div></noscript>
+
+  <div id="app" class="app-shell">
+    <section id="homeScreen" class="home-screen hidden" aria-label="Home screen">
+      <div id="wallpaper" class="wallpaper"></div>
+      <div class="home-scrim"></div>
+      <header class="phone-status" aria-label="Status">
+        <span id="statusTime">09:41</span>
+        <div class="status-symbols" aria-hidden="true">
+          <span class="signal-bars"><i></i><i></i><i></i><i></i></span>
+          <span class="wifi-symbol"></span>
+          <span class="battery-symbol"><i></i></span>
+        </div>
+      </header>
+      <button id="homeEditDone" class="home-done hidden" type="button">Done</button>
+      <div class="home-content">
+        <section id="widgetArea" class="widget-area" aria-label="Widgets"></section>
+        <section id="homeAppGrid" class="app-grid" aria-label="Applications"></section>
+      </div>
+      <div class="page-dots" aria-hidden="true"><span class="active"></span></div>
+      <section id="homeDock" class="home-dock" aria-label="Dock"></section>
+    </section>
+
+    <section id="workspace" class="workspace">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true"><span>&lt;/&gt;</span></div>
+          <div><strong>Pro Runner</strong><small>Local web runtime</small></div>
+        </div>
+        <div class="topbar-actions">
+          <div class="view-switch" role="group" aria-label="View">
+            <button id="workspaceViewButton" class="active" type="button">Workspace</button>
+            <button id="homeViewButton" type="button">Home</button>
+          </div>
+          <button id="settingsButton" class="icon-button" type="button" aria-label="Settings">⚙︎</button>
+        </div>
+      </header>
+
+      <main class="workspace-main">
+        <section class="hero-panel">
+          <div class="hero-copy">
+            <span class="eyebrow">LOCAL-FIRST RUNTIME</span>
+            <h1>Run static web projects like local apps.</h1>
+            <p>Projects stay on this device. A service worker exposes them through virtual URLs with optional compatibility transforms and diagnostics.</p>
+          </div>
+          <div class="hero-status">
+            <div class="status-orb" id="runtimeOrb"></div>
+            <div><strong id="runtimeStatus">Starting runtime…</strong><small id="runtimeDetail">Preparing storage and service worker.</small></div>
+          </div>
+        </section>
+
+        <section class="import-row" aria-label="Import projects">
+          <button id="importFileButton" class="import-card" type="button" disabled>
+            <span class="import-icon">◇</span><span><strong>HTML file</strong><small>Single self-contained document</small></span>
+          </button>
+          <button id="importFolderButton" class="import-card" type="button" disabled>
+            <span class="import-icon">▱</span><span><strong>Project folder</strong><small>Preserve complete directory layout</small></span>
+          </button>
+          <button id="importZipButton" class="import-card" type="button" disabled>
+            <span class="import-icon">⌁</span><span><strong>ZIP archive</strong><small>Extract locally in the browser</small></span>
+          </button>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <div><span class="eyebrow">LIBRARY</span><h2>Your projects</h2></div>
+            <div class="section-tools"><input id="projectSearch" class="search-input" type="search" placeholder="Search projects" autocomplete="off"><span id="projectCount" class="count-pill">0</span></div>
+          </div>
+          <div id="emptyLibrary" class="empty-state">
+            <div class="empty-glyph">+</div><strong>No projects yet</strong><p>Import an HTML file, a web project folder, or a ZIP archive.</p>
+          </div>
+          <div id="projectGrid" class="project-grid"></div>
+        </section>
+
+        <section class="section-block diagnostics-summary">
+          <div class="section-head"><div><span class="eyebrow">RUNTIME</span><h2>Capabilities</h2></div><button id="activityButton" class="subtle-button" type="button">Open diagnostics</button></div>
+          <div id="capabilityGrid" class="capability-grid"></div>
+        </section>
+      </main>
+      <footer class="workspace-footer"><span>Private by default. Imported content is stored in this browser profile.</span><span id="versionLabel"></span></footer>
+    </section>
+
+    <section id="viewer" class="viewer-shell hidden" aria-label="Project viewer">
+      <iframe id="projectFrame" title="Local project"></iframe>
+      <button id="viewerControl" class="viewer-control" type="button" aria-label="Runner controls">•••</button>
+      <div id="viewerMenu" class="viewer-menu hidden">
+        <div class="viewer-menu-title"><strong id="viewerProjectName">Project</strong><small id="viewerProjectPath">index.html</small></div>
+        <button id="viewerReload" type="button">Reload</button>
+        <button id="viewerDebug" type="button">Diagnostics</button>
+        <button id="viewerHome" type="button">Home screen</button>
+        <button id="viewerWorkspace" type="button">Workspace</button>
+      </div>
+      <div id="perfHud" class="perf-hud hidden"><strong id="perfFps">— FPS</strong><span id="perfFrame">— ms</span></div>
+    </section>
+  </div>
+
+  <input id="filePicker" class="visually-hidden" type="file" accept=".html,.htm,.xhtml,text/html,application/xhtml+xml">
+  <input id="folderPicker" class="visually-hidden" type="file" webkitdirectory multiple>
+  <input id="zipPicker" class="visually-hidden" type="file" accept=".zip,application/zip,application/x-zip-compressed">
+  <input id="wallpaperPicker" class="visually-hidden" type="file" accept="image/*">
+  <input id="iconPicker" class="visually-hidden" type="file" accept="image/*">
+
+  <dialog id="entryDialog" class="modal">
+    <form method="dialog" class="modal-card">
+      <div class="modal-head"><div><span class="eyebrow">ENTRY DOCUMENT</span><h2>Choose a starting page</h2></div><button value="cancel" class="close-button" aria-label="Close">×</button></div>
+      <div id="entryList" class="entry-list"></div>
+    </form>
+  </dialog>
+
+  <dialog id="projectDialog" class="modal sheet-modal">
+    <form method="dialog" class="modal-card sheet-card" id="projectForm">
+      <div class="modal-head"><div><span class="eyebrow">PROJECT</span><h2 id="projectDialogTitle">Project settings</h2></div><button value="cancel" class="close-button" aria-label="Close">×</button></div>
+      <div class="project-editor">
+        <label class="field"><span>Name</span><input id="projectNameInput" type="text" maxlength="80"></label>
+        <div class="field-grid">
+          <label class="field"><span>Runtime mode</span><select id="projectTrustSelect"><option value="trusted">Trusted / full compatibility</option><option value="isolated">Isolated sandbox</option></select></label>
+          <label class="field"><span>Navigation</span><select id="projectSpaSelect"><option value="false">Static paths</option><option value="true">SPA fallback</option></select></label>
+        </div>
+        <div class="toggle-stack">
+          <label class="toggle-row"><span><strong>Compatibility layer</strong><small>Rewrite root-relative resources and inject the runtime bridge.</small></span><input id="projectCompatToggle" type="checkbox" role="switch"></label>
+          <label class="toggle-row"><span><strong>Diagnostics bridge</strong><small>Capture console output, errors, network events, and frame timing.</small></span><input id="projectDebugToggle" type="checkbox" role="switch"></label>
+          <label class="toggle-row"><span><strong>Pin to dock</strong><small>Keep this project in the Home mode dock.</small></span><input id="projectDockToggle" type="checkbox" role="switch"></label>
+        </div>
+        <div class="icon-editor"><div id="projectIconPreview" class="large-app-icon"></div><div><button id="chooseIconButton" class="subtle-button" type="button">Choose custom icon</button><button id="clearIconButton" class="text-button" type="button">Use automatic icon</button></div></div>
+      </div>
+      <div class="modal-actions split"><button id="updateProjectButton" class="subtle-button" type="button">Update source…</button><div><button id="deleteProjectButton" class="danger-button" type="button">Delete</button><button id="saveProjectButton" class="primary-button" type="button">Save</button></div></div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="modal sheet-modal">
+    <form method="dialog" class="modal-card sheet-card">
+      <div class="modal-head"><div><span class="eyebrow">PRO RUNNER</span><h2>Settings</h2></div><button value="cancel" class="close-button" aria-label="Close">×</button></div>
+      <div class="settings-groups">
+        <section class="settings-group"><h3>Launch</h3>
+          <label class="field"><span>Default view</span><select id="startViewSelect"><option value="workspace">Workspace</option><option value="home">Home screen</option></select></label>
+          <label class="toggle-row"><span><strong>Show icon labels</strong><small>Display project names below Home mode icons.</small></span><input id="iconLabelsToggle" type="checkbox" role="switch" checked></label>
+        </section>
+        <section class="settings-group"><h3>Home screen</h3>
+          <div id="wallpaperPresets" class="wallpaper-presets"></div>
+          <button id="customWallpaperButton" class="subtle-button full" type="button">Choose wallpaper image</button>
+          <label class="range-row"><span>Wallpaper dimming</span><input id="wallpaperDimRange" type="range" min="0" max="70" step="1"></label>
+          <label class="toggle-row"><span><strong>Clock widget</strong><small>Live local time widget.</small></span><input id="clockWidgetToggle" type="checkbox" role="switch"></label>
+          <label class="toggle-row"><span><strong>Calendar widget</strong><small>Current date and month overview.</small></span><input id="calendarWidgetToggle" type="checkbox" role="switch"></label>
+        </section>
+        <section class="settings-group"><h3>Default project behavior</h3>
+          <label class="toggle-row"><span><strong>Compatibility layer</strong><small>Enable for newly imported projects.</small></span><input id="defaultCompatToggle" type="checkbox" role="switch"></label>
+          <label class="toggle-row"><span><strong>Diagnostics</strong><small>Enable the runtime bridge for newly imported projects.</small></span><input id="defaultDebugToggle" type="checkbox" role="switch"></label>
+        </section>
+        <section class="settings-group"><h3>Storage</h3><div id="storageSummary" class="storage-summary">Calculating…</div><button id="clearAllButton" class="danger-button full" type="button">Remove all local projects and settings</button></section>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="diagnosticsDialog" class="modal diagnostics-modal">
+    <div class="modal-card diagnostics-card">
+      <div class="modal-head"><div><span class="eyebrow">DIAGNOSTICS</span><h2>Runtime activity</h2></div><button id="closeDiagnostics" class="close-button" type="button" aria-label="Close">×</button></div>
+      <div class="diag-tabs"><button data-tab="console" class="active" type="button">Console</button><button data-tab="network" type="button">Network</button><button data-tab="performance" type="button">Performance</button></div>
+      <div id="consolePanel" class="diag-panel active"><div class="diag-toolbar"><button id="clearConsole" type="button">Clear</button></div><div id="consoleLog" class="log-list"></div></div>
+      <div id="networkPanel" class="diag-panel"><div class="diag-toolbar"><button id="clearNetwork" type="button">Clear</button></div><div id="networkLog" class="network-list"></div></div>
+      <div id="performancePanel" class="diag-panel"><div class="performance-grid"><div><span>Frame rate</span><strong id="diagFps">—</strong></div><div><span>Median frame</span><strong id="diagMedian">—</strong></div><div><span>p95 frame</span><strong id="diagP95">—</strong></div><div><span>Long frames</span><strong id="diagLongFrames">—</strong></div></div></div>
+    </div>
+  </dialog>
+
+  <div id="toastHost" class="toast-host" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
