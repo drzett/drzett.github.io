@@ -1,133 +1,218 @@
-/* Pro Runner 1.3 — Home mode fidelity pass.
-   The Home screen uses one shared four-column geometry for widgets and apps,
-   calibrated against a full-screen iPhone 17 Pro Max reference capture. */
+/* Pro Runner 1.4 — SpringBoard geometry and interaction layer.
+   One spacing token drives the outer margin, column gap, row gap, and 2x2
+   widget math. This guarantees that a 2x2 widget has exactly the same outer
+   dimensions as the four 1x1 icon cells underneath it. */
 
 .home-screen {
-  --home-grid-side: clamp(20px, 6vw, 28px);
-  --home-grid-gap: clamp(18px, 5.25vw, 24px);
-  --home-top-gap: clamp(28px, 7vw, 32px);
-  --home-widget-radius: clamp(25px, 7vw, 31px);
-  --home-icon-radius: clamp(16px, 4.5vw, 20px);
-  --home-dock-side: clamp(14px, 3.6vw, 18px);
-  --home-dock-height: clamp(108px, 12.2dvh, 118px);
-  --home-dock-bottom: max(8px, calc(env(safe-area-inset-bottom) - 21px));
-  --home-dock-radius: clamp(30px, 7.4vw, 34px);
+  --spring-gap: clamp(23px, 5.85vw, 26px);
+  --spring-width: min(460px, 100vw);
+  --spring-cell: calc((var(--spring-width) - (5 * var(--spring-gap))) / 4);
+  --spring-top-gap: clamp(30px, 7.1vw, 33px);
+  --spring-icon-radius: 25.9%;
+
+  --dock-side: clamp(16px, 3.75vw, 18px);
+  --dock-height: clamp(108px, 11.8dvh, 114px);
+  --dock-bottom: max(12px, calc(env(safe-area-inset-bottom) - 17px));
+  --dock-radius: clamp(36px, 8.7vw, 40px);
 }
 
-/* The system status bar remains native. Start content below it with the same
-   visual breathing room as the reference SpringBoard layout. */
+/* The system owns the real status indicators. The virtual surface starts below
+   the safe area and cannot drift sideways through browser overflow. */
 .home-content {
-  top: calc(env(safe-area-inset-top) + var(--home-top-gap));
-  right: max(var(--home-grid-side), env(safe-area-inset-right));
-  bottom: calc(var(--home-dock-height) + var(--home-dock-bottom) + 46px);
-  left: max(var(--home-grid-side), env(safe-area-inset-left));
+  position: absolute;
+  z-index: 2;
+  top: calc(env(safe-area-inset-top) + var(--spring-top-gap));
+  right: max(var(--spring-gap), env(safe-area-inset-right));
+  bottom: calc(var(--dock-height) + var(--dock-bottom) + 48px);
+  left: max(var(--spring-gap), env(safe-area-inset-left));
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: var(--spring-cell);
+  column-gap: var(--spring-gap);
+  row-gap: var(--spring-gap);
+  align-content: start;
   padding: 0 0 24px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  contain: layout paint;
 }
+.home-content::-webkit-scrollbar { display: none; }
 
-/* Widgets and app icons share the exact same four-column master grid. A 2x2
-   widget therefore lands on the same outer edges as two icon columns. */
+/* The old separate widget and application grids become structural-only nodes.
+   Their children participate directly in the single master grid above. */
 .widget-area,
 .app-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: var(--home-grid-gap);
-}
-
-.widget-area {
-  gap: var(--home-grid-gap);
-  margin: 0 0 var(--home-grid-gap);
+  display: contents;
 }
 
 .home-widget {
   grid-column: span 2;
+  grid-row: span 2;
+  min-width: 0;
   min-height: 0;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--home-widget-radius);
+  width: auto;
+  height: auto;
+  aspect-ratio: auto;
+  border-radius: calc(var(--spring-cell) * .205);
   padding: clamp(15px, 4vw, 18px);
-}
-
-/* The reference uses the large-icon SpringBoard geometry. Icons fill their
-   grid tracks instead of floating as smaller squares inside oversized cells. */
-.app-grid {
-  row-gap: var(--home-grid-gap);
-  align-items: start;
+  margin: 0;
+  align-self: stretch;
+  justify-self: stretch;
 }
 
 .home-app {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  min-width: 0;
   position: relative;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: auto;
+  align-self: stretch;
+  justify-self: stretch;
   align-items: stretch;
+  text-align: center;
+  cursor: pointer;
+  transform: translateZ(0);
 }
 
 .home-app-icon {
   width: 100%;
-  height: auto;
+  height: 100%;
+  max-width: none;
+  max-height: none;
   aspect-ratio: 1 / 1;
-  border-radius: var(--home-icon-radius);
+  border-radius: var(--spring-icon-radius);
   flex: 0 0 auto;
 }
 
-/* Labels stay optional, but no longer change the row geometry. This preserves
-   the same icon-to-icon alignment in both labelled and large-icon modes. */
+/* Labels live inside the shared spacing lane instead of changing row height. */
 .home-app-label {
   position: absolute;
   top: calc(100% + 5px);
   left: 50%;
-  width: calc(100% + 20px);
+  width: calc(100% + var(--spring-gap));
   max-width: none;
   margin: 0;
   transform: translateX(-50%);
-  text-align: center;
   font-size: 11px;
   line-height: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
-
 .home-app.no-label .home-app-label { display: none; }
 
 .app-delete-badge {
   left: -6px;
   top: -6px;
+  width: 22px;
+  height: 22px;
 }
 
-/* Compact, rounder dock proportions matching the reference capture while
-   still extending safely into the iPhone's lower rounded region. */
+/* Prevent the legacy synchronized wobble from winning the cascade. Each item
+   gets stable per-item timing/phase values from springboard-v14.js. */
+@keyframes springboard-icon-jiggle {
+  0%   { transform: translate3d(calc(-1 * var(--jiggle-shift)), 0, 0) rotate(calc(-1 * var(--jiggle-angle))); }
+  50%  { transform: translate3d(0, calc(.35 * var(--jiggle-shift)), 0) rotate(.2deg); }
+  100% { transform: translate3d(var(--jiggle-shift), 0, 0) rotate(var(--jiggle-angle)); }
+}
+@keyframes springboard-widget-jiggle {
+  0%   { rotate: calc(-1 * var(--jiggle-angle)); translate: calc(-.45 * var(--jiggle-shift)) 0; }
+  100% { rotate: var(--jiggle-angle); translate: calc(.45 * var(--jiggle-shift)) 0; }
+}
+
+.springboard-editing .home-app:not(.spring-dragging) .home-app-icon,
+.springboard-editing .home-app.wiggle:not(.spring-dragging) .home-app-icon,
+.home-app.wiggle:not(.spring-dragging) .home-app-icon {
+  animation-name: springboard-icon-jiggle !important;
+  animation-duration: var(--jiggle-duration, .14s) !important;
+  animation-delay: var(--jiggle-delay, 0s) !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+  animation-direction: alternate !important;
+  transform-origin: 50% 54%;
+  will-change: transform;
+}
+
+.springboard-editing .home-widget:not(.spring-dragging) {
+  animation: springboard-widget-jiggle var(--jiggle-duration, .15s) var(--jiggle-delay, 0s) ease-in-out infinite alternate;
+  transform-origin: 50% 52%;
+  will-change: rotate, translate;
+}
+
+.springboard-editing .home-app,
+.springboard-editing .home-widget {
+  touch-action: none;
+}
+
+.spring-dragging {
+  animation: none !important;
+  filter: drop-shadow(0 14px 22px rgba(0,0,0,.28));
+  transition: none !important;
+  cursor: grabbing;
+}
+.spring-dragging .home-app-icon { animation: none !important; }
+
+.spring-drop-target {
+  z-index: 0;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 24%;
+  background: rgba(255,255,255,.075);
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28);
+  pointer-events: none;
+  animation: spring-drop-in .12s ease-out both;
+}
+.spring-drop-target.blocked {
+  background: rgba(255,95,95,.08);
+  box-shadow: inset 0 0 0 1.5px rgba(255,120,120,.38);
+}
+@keyframes spring-drop-in { from { opacity: 0; scale: .94; } to { opacity: 1; scale: 1; } }
+
+/* Dock geometry intentionally differs from the main grid, matching SpringBoard:
+   slightly tighter icon spacing, a stronger continuous curve, and a position a
+   few points above the previous release. */
 .home-dock {
-  left: max(var(--home-dock-side), env(safe-area-inset-left));
-  right: max(var(--home-dock-side), env(safe-area-inset-right));
+  left: max(var(--dock-side), env(safe-area-inset-left));
+  right: max(var(--dock-side), env(safe-area-inset-right));
   top: auto;
-  bottom: var(--home-dock-bottom);
-  height: var(--home-dock-height);
-  border-radius: var(--home-dock-radius);
-  padding: 9px clamp(14px, 2.7vw, 20px);
+  bottom: var(--dock-bottom);
+  height: var(--dock-height);
+  border-radius: var(--dock-radius);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(7px, 1.9vw, 10px);
+  padding: 9px clamp(12px, 2.8vw, 18px);
 }
-
 .home-dock .home-app {
   width: auto;
+  height: auto;
   aspect-ratio: auto;
   align-items: center;
+  justify-self: stretch;
 }
-
 .home-dock .home-app-icon {
-  width: clamp(60px, 15.8vw, 72px);
-  height: clamp(60px, 15.8vw, 72px);
+  width: min(100%, 72px);
+  height: auto;
   aspect-ratio: 1 / 1;
-  border-radius: clamp(15px, 4.1vw, 18px);
+  border-radius: var(--spring-icon-radius);
+  justify-self: center;
 }
+.home-dock .home-app-label { display: none; }
 
-/* Keep the page indicator visually detached from the dock after the dock
-   becomes slightly more compact. */
 .page-dots {
-  bottom: calc(var(--home-dock-bottom) + var(--home-dock-height) + 19px);
+  bottom: calc(var(--dock-bottom) + var(--dock-height) + 21px);
 }
 
-/* Preserve a sensible preview on wider browsers without allowing phone-scale
-   spacing variables to grow with the desktop viewport. */
 @media (min-width: 700px) {
   .home-screen {
-    --home-grid-side: 27px;
-    --home-grid-gap: 23px;
-    --home-top-gap: 31px;
-    --home-dock-side: 17px;
+    --spring-gap: 25px;
+    --spring-top-gap: 32px;
+    --dock-side: 17px;
   }
 }

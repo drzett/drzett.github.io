@@ -1,7 +1,7 @@
 {
-  "version": "1.3.0",
-  "build": "2026-09-11.4",
+  "version": "1.4.0",
+  "build": "2026-09-11.5",
   "channel": "stable",
   "released": "2026-09-11",
-  "summary": "Recalibrates Home mode around a shared four-column iPhone-style master grid, with larger aligned app icons, square 2x2 widgets, refined top spacing, and a more compact rounded dock."
+  "summary": "Rebuilds Home mode on one mathematically shared SpringBoard grid, makes compatibility transforms opt-in for new imports, prevents horizontal drift, adds independent per-item jiggle timing, enables persistent grid-slot dragging for apps and widgets, and refines the dock geometry."
 }

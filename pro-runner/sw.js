@@ -1,4 +1,4 @@
-const SHELL_VERSION = '1.3.0';
+const SHELL_VERSION = '1.4.0';
 const CACHE_NAME = `pro-runner-shell-${SHELL_VERSION}`;
 const DB_NAME = 'pro-runner-v1';
 const DB_VERSION = 1;
@@ -10,7 +10,7 @@ const VIRTUAL_PREFIX = '__site/';
 
 const SHELL_ASSETS = [
   './', './index.html', './styles.css', './home-fidelity.css', './app.js', './bridge.js', './update-ui.js',
-  './manifest.webmanifest', './zip.js', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
+  './springboard-v14.js', './manifest.webmanifest', './zip.js', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -213,7 +213,7 @@ function transformJS(text, project) {
 }
 
 function escapeAttr(value) {
-  return String(value).replace(/[&"'<>]/g, (c) => ({'&':'&amp;','"':'&quot',"'":'&#39;','<':'&lt;','>':'&gt;'}[c]));
+  return String(value).replace(/[&"'<>]/g, (c) => ({'&':'&amp;','"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;'}[c]));
 }
 
 async function resolveRecord(request, project, rawPath) {
