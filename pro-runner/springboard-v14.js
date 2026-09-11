@@ -2,7 +2,6 @@ const SETTINGS_KEY = 'pro-runner-settings';
 const DEFAULT_COMPAT_MIGRATION_KEY = 'pro-runner-v14-raw-default';
 const LAYOUT_KEY = 'pro-runner-home-layout-v2';
 const GRID_COLUMNS = 4;
-const MAX_LAYOUT_ROWS = 12;
 
 function migrateCompatibilityDefault() {
   if (localStorage.getItem(DEFAULT_COMPAT_MIGRATION_KEY) === '1') return;
@@ -43,10 +42,6 @@ function itemSize(item) {
   return item.classList.contains('home-widget') ? { w: 2, h: 2 } : { w: 1, h: 1 };
 }
 
-function validPosition(pos, size) {
-  return Number.isInteger(pos?.col) && Number.isInteger(pos?.row) && pos.col >= 1 && pos.row >= 1 && pos.col + size.w - 1 <= GRID_COLUMNS && pos.row + size.h - 1 <= MAX_LAYOUT_ROWS;
-}
-
 function cellsFor(pos, size) {
   const cells = [];
   for (let row = pos.row; row < pos.row + size.h; row += 1) {
@@ -63,16 +58,6 @@ function isFree(occupied, pos, size) {
   return cellsFor(pos, size).every((cell) => !occupied.has(cell));
 }
 
-function findFirstFree(occupied, size) {
-  for (let row = 1; row <= MAX_LAYOUT_ROWS - size.h + 1; row += 1) {
-    for (let col = 1; col <= GRID_COLUMNS - size.w + 1; col += 1) {
-      const pos = { col, row };
-      if (isFree(occupied, pos, size)) return pos;
-    }
-  }
-  return { col: 1, row: MAX_LAYOUT_ROWS - size.h + 1 };
-}
-
 function hash01(value, salt = 0) {
   let hash = 2166136261 ^ salt;
   for (const char of String(value)) {
@@ -83,10 +68,11 @@ function hash01(value, salt = 0) {
 }
 
 function applyJiggleSeed(item, key) {
+  const widget = item.classList.contains('home-widget');
   item.style.setProperty('--jiggle-delay', `${(-0.30 * hash01(key, 11)).toFixed(3)}s`);
-  item.style.setProperty('--jiggle-duration', `${(0.115 + 0.055 * hash01(key, 29)).toFixed(3)}s`);
-  item.style.setProperty('--jiggle-angle', `${(1.55 + 0.85 * hash01(key, 47)).toFixed(2)}deg`);
-  item.style.setProperty('--jiggle-shift', `${(0.25 + 0.75 * hash01(key, 71)).toFixed(2)}px`);
+  item.style.setProperty('--jiggle-duration', `${((widget ? 0.235 : 0.195) + (widget ? 0.060 : 0.070) * hash01(key, 29)).toFixed(3)}s`);
+  item.style.setProperty('--jiggle-angle', `${((widget ? 0.72 : 1.90) + (widget ? 0.38 : 0.85) * hash01(key, 47)).toFixed(2)}deg`);
+  item.style.setProperty('--jiggle-shift', `${((widget ? 0.10 : 0.48) + (widget ? 0.20 : 0.72) * hash01(key, 71)).toFixed(2)}px`);
 }
 
 function applyPosition(item, pos, size) {
@@ -94,6 +80,7 @@ function applyPosition(item, pos, size) {
   item.style.gridRow = `${pos.row} / span ${size.h}`;
   item.dataset.springCol = String(pos.col);
   item.dataset.springRow = String(pos.row);
+  item.classList.remove('spring-overflow');
 }
 
 function setupSpringBoard() {
@@ -105,8 +92,6 @@ function setupSpringBoard() {
   const doneButton = document.getElementById('homeEditDone');
   if (!homeScreen || !homeContent || !widgetArea || !appGrid || !dock || !doneButton) return;
 
-  // The previous release defaulted compatibility transforms on. Make new imports
-  // raw-first, but do not silently alter per-project choices already stored.
   const defaultCompatToggle = document.getElementById('defaultCompatToggle');
   if (defaultCompatToggle?.checked) {
     defaultCompatToggle.checked = false;
@@ -122,6 +107,7 @@ function setupSpringBoard() {
   let drag = null;
   let dropMarker = null;
   let suppressClickUntil = 0;
+  let visibleRows = 4;
 
   function currentItems() {
     return [...widgetArea.querySelectorAll('.home-widget'), ...appGrid.querySelectorAll('.home-app')];
@@ -133,10 +119,39 @@ function setupSpringBoard() {
     return editing;
   }
 
-  function normalizeLayout(items) {
-    const occupied = new Map();
+  function measureGrid() {
+    const rect = homeContent.getBoundingClientRect();
+    const style = getComputedStyle(homeContent);
+    const columnGap = parseFloat(style.columnGap) || 0;
+    const rowGap = parseFloat(style.rowGap) || columnGap;
+    const cell = (rect.width - columnGap * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
+    const rows = Math.max(2, Math.floor((rect.height + rowGap) / Math.max(1, cell + rowGap)));
+    visibleRows = rows;
+    homeContent.style.setProperty('--springboard-visible-rows', String(rows));
+    return { rect, columnGap, rowGap, cell, rows };
+  }
 
-    // Keep valid saved placements first. This preserves intentionally empty slots.
+  function validPosition(pos, size, rows = visibleRows) {
+    return Number.isInteger(pos?.col) && Number.isInteger(pos?.row) &&
+      pos.col >= 1 && pos.row >= 1 &&
+      pos.col + size.w - 1 <= GRID_COLUMNS && pos.row + size.h - 1 <= rows;
+  }
+
+  function findFirstFree(occupied, size, rows = visibleRows) {
+    for (let row = 1; row <= rows - size.h + 1; row += 1) {
+      for (let col = 1; col <= GRID_COLUMNS - size.w + 1; col += 1) {
+        const pos = { col, row };
+        if (isFree(occupied, pos, size)) return pos;
+      }
+    }
+    return null;
+  }
+
+  function normalizeLayout(items) {
+    measureGrid();
+    const occupied = new Map();
+    const accepted = new Set();
+
     for (const item of items) {
       const key = itemKey(item);
       if (!key) continue;
@@ -144,40 +159,34 @@ function setupSpringBoard() {
       const pos = layout.positions[key];
       if (validPosition(pos, size) && isFree(occupied, pos, size)) {
         occupy(occupied, key, pos, size);
+        accepted.add(key);
         applyPosition(item, pos, size);
       }
     }
 
-    // Items without a valid placement use the first free grid region.
     for (const item of items) {
       const key = itemKey(item);
       if (!key) continue;
       const size = itemSize(item);
-      let pos = layout.positions[key];
-      if (!validPosition(pos, size) || cellsFor(pos, size).some((cell) => occupied.get(cell) !== key && occupied.has(cell))) {
-        for (const [cell, owner] of [...occupied]) if (owner === key) occupied.delete(cell);
-        pos = findFirstFree(occupied, size);
-        layout.positions[key] = pos;
-        occupy(occupied, key, pos, size);
+      if (!accepted.has(key)) {
+        const pos = findFirstFree(occupied, size);
+        if (pos) {
+          layout.positions[key] = pos;
+          occupy(occupied, key, pos, size);
+          applyPosition(item, pos, size);
+        } else {
+          item.classList.add('spring-overflow');
+          item.style.removeProperty('grid-column');
+          item.style.removeProperty('grid-row');
+        }
       }
-      applyPosition(item, pos, size);
       applyJiggleSeed(item, key);
       item.dataset.springKey = key;
     }
 
-    // Keep positions for temporarily hidden widgets/docked apps; do not compact
-    // deliberately empty slots behind the user's back.
     saveLayout(layout);
-
-    let maxRow = 1;
-    for (const item of items) {
-      const key = itemKey(item);
-      const pos = key && layout.positions[key];
-      if (!pos) continue;
-      const size = itemSize(item);
-      maxRow = Math.max(maxRow, pos.row + size.h - 1);
-    }
-    homeContent.style.setProperty('--springboard-row-count', String(maxRow));
+    homeContent.scrollTop = 0;
+    homeContent.scrollLeft = 0;
   }
 
   function decorate() {
@@ -201,7 +210,7 @@ function setupSpringBoard() {
   function queueDecorate() {
     if (decorateQueued) return;
     decorateQueued = true;
-    queueMicrotask(decorate);
+    requestAnimationFrame(decorate);
   }
 
   function layoutSnapshot(excludeKey = null) {
@@ -209,7 +218,7 @@ function setupSpringBoard() {
     const entries = new Map();
     for (const item of currentItems()) {
       const key = itemKey(item);
-      if (!key || key === excludeKey) continue;
+      if (!key || key === excludeKey || item.classList.contains('spring-overflow')) continue;
       const size = itemSize(item);
       const pos = layout.positions[key];
       if (!validPosition(pos, size)) continue;
@@ -220,18 +229,16 @@ function setupSpringBoard() {
   }
 
   function targetFromPointer(event, item) {
-    const rect = homeContent.getBoundingClientRect();
-    const style = getComputedStyle(homeContent);
-    const gap = parseFloat(style.columnGap) || 0;
-    const cell = (rect.width - gap * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
-    const pitch = cell + gap;
+    const { rect, columnGap, rowGap, cell, rows } = measureGrid();
     const size = itemSize(item);
+    const pitchX = cell + columnGap;
+    const pitchY = cell + rowGap;
     const left = event.clientX - drag.offsetX - rect.left;
-    const top = event.clientY - drag.offsetY - rect.top + homeContent.scrollTop;
-    let col = Math.round(left / pitch) + 1;
-    let row = Math.round(top / pitch) + 1;
+    const top = event.clientY - drag.offsetY - rect.top;
+    let col = Math.round(left / pitchX) + 1;
+    let row = Math.round(top / pitchY) + 1;
     col = Math.max(1, Math.min(GRID_COLUMNS - size.w + 1, col));
-    row = Math.max(1, Math.min(MAX_LAYOUT_ROWS - size.h + 1, row));
+    row = Math.max(1, Math.min(rows - size.h + 1, row));
     return { col, row };
   }
 
@@ -259,6 +266,7 @@ function setupSpringBoard() {
 
   function canDrop(item, key, pos) {
     const size = itemSize(item);
+    if (!validPosition(pos, size)) return false;
     const { conflictKeys, entries } = conflictsAt(key, pos, size);
     if (!conflictKeys.length) return true;
     if (size.w === 1 && size.h === 1 && conflictKeys.length === 1) {
@@ -270,6 +278,7 @@ function setupSpringBoard() {
 
   function commitDrop(item, key, pos) {
     const size = itemSize(item);
+    if (!validPosition(pos, size)) return false;
     const oldPos = { ...(layout.positions[key] || { col: 1, row: 1 }) };
     const { conflictKeys, entries } = conflictsAt(key, pos, size);
     if (!conflictKeys.length) {
@@ -277,7 +286,7 @@ function setupSpringBoard() {
     } else if (size.w === 1 && size.h === 1 && conflictKeys.length === 1) {
       const otherKey = conflictKeys[0];
       const other = entries.get(otherKey);
-      if (!other || other.size.w !== 1 || other.size.h !== 1) return false;
+      if (!other || other.size.w !== 1 || other.size.h !== 1 || !validPosition(oldPos, other.size)) return false;
       layout.positions[key] = pos;
       layout.positions[otherKey] = oldPos;
       applyPosition(other.item, oldPos, other.size);
@@ -304,14 +313,15 @@ function setupSpringBoard() {
       if (!syncEditClass() || event.button > 0) return;
       if (event.target.closest('.app-delete-badge')) return;
       const key = itemKey(item);
-      if (!key) return;
+      if (!key || item.classList.contains('spring-overflow')) return;
       const rect = item.getBoundingClientRect();
       drag = {
         item, key, pointerId: event.pointerId,
         startX: event.clientX, startY: event.clientY,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
-        moved: false, target: layout.positions[key] ? { ...layout.positions[key] } : { col: 1, row: 1 },
+        moved: false,
+        target: layout.positions[key] ? { ...layout.positions[key] } : { col: 1, row: 1 },
       };
       try { item.setPointerCapture(event.pointerId); } catch {}
     });
@@ -338,7 +348,10 @@ function setupSpringBoard() {
       if (active.moved) {
         const accepted = commitDrop(item, active.key, active.target);
         suppressClickUntil = performance.now() + 450;
-        if (!accepted) item.animate([{ transform: item.style.transform }, { transform: 'translate3d(0,0,0) scale(1)' }], { duration: 180, easing: 'cubic-bezier(.2,.8,.2,1)' });
+        if (!accepted) item.animate(
+          [{ transform: item.style.transform }, { transform: 'translate3d(0,0,0) scale(1)' }],
+          { duration: 180, easing: 'cubic-bezier(.2,.8,.2,1)' },
+        );
       }
       clearDragVisual(item);
       try { item.releasePointerCapture(event.pointerId); } catch {}
@@ -347,7 +360,6 @@ function setupSpringBoard() {
     item.addEventListener('pointercancel', finish);
   }
 
-  // Prevent a completed drag from turning into the app.js edit click/open action.
   homeContent.addEventListener('click', (event) => {
     if (performance.now() < suppressClickUntil) {
       event.preventDefault();
@@ -360,11 +372,13 @@ function setupSpringBoard() {
     hideDropMarker();
   }, true);
 
-  // Keep the home surface horizontally immovable. A future multi-page build can
-  // replace this with deliberate page snapping instead of browser scrolling.
   homeContent.addEventListener('scroll', () => {
     if (homeContent.scrollLeft !== 0) homeContent.scrollLeft = 0;
+    if (homeContent.scrollTop !== 0) homeContent.scrollTop = 0;
   }, { passive: true });
+
+  window.addEventListener('resize', queueDecorate, { passive: true });
+  window.visualViewport?.addEventListener('resize', queueDecorate, { passive: true });
 
   const observer = new MutationObserver(queueDecorate);
   observer.observe(homeScreen, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
