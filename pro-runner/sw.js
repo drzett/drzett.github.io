@@ -1,1 +1,19 @@
-const PATCH_VERSION='1.4.1';const PATCH_CACHE='pro-runner-shell-1.4.0';const PATCH_ASSETS=['./update-ui-core.js','./springboard-v14.js','./v141-ui.js','./v141-icons.js','./v141-touch.js'];self.addEventListener('message',event=>{if(event.data?.type==='GET_VERSION'&&event.ports?.[0]){event.stopImmediatePropagation();event.ports[0].postMessage({version:PATCH_VERSION})}});self.addEventListener('install',event=>{event.waitUntil(caches.open(PATCH_CACHE).then(cache=>cache.addAll(PATCH_ASSETS)))});self.addEventListener('activate',event=>{event.waitUntil((async()=>{const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});for(const client of clients)client.postMessage({type:'PRO_RUNNER_SW_READY',version:PATCH_VERSION})})())});importScripts('./sw-core-v140.js');
+const PATCH_VERSION='1.4.2';
+const PATCH_CACHE='pro-runner-shell-1.4.0';
+const PATCH_ASSETS=['./update-ui-core.js','./springboard-v14.js','./v142-ui.js','./icon-designer.js','./v141-touch.js'];
+self.addEventListener('message',event=>{
+  if(event.data?.type==='GET_VERSION'&&event.ports?.[0]){
+    event.stopImmediatePropagation();
+    event.ports[0].postMessage({version:PATCH_VERSION});
+  }
+});
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(PATCH_CACHE).then(cache=>cache.addAll(PATCH_ASSETS)));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const client of clients)client.postMessage({type:'PRO_RUNNER_SW_READY',version:PATCH_VERSION});
+  })());
+});
+importScripts('./sw-core-v140.js');
