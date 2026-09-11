@@ -1,7 +1,7 @@
 {
-  "version": "1.2.1",
-  "build": "2026-09-11.3",
+  "version": "1.3.0",
+  "build": "2026-09-11.4",
   "channel": "stable",
   "released": "2026-09-11",
-  "summary": "Limits the automatic software-update prompt to installed standalone app sessions while keeping update checks, workspace status, and Settings controls available in Safari."
+  "summary": "Recalibrates Home mode around a shared four-column iPhone-style master grid, with larger aligned app icons, square 2x2 widgets, refined top spacing, and a more compact rounded dock."
 }

@@ -1,0 +1,133 @@
+/* Pro Runner 1.3 — Home mode fidelity pass.
+   The Home screen uses one shared four-column geometry for widgets and apps,
+   calibrated against a full-screen iPhone 17 Pro Max reference capture. */
+
+.home-screen {
+  --home-grid-side: clamp(20px, 6vw, 28px);
+  --home-grid-gap: clamp(18px, 5.25vw, 24px);
+  --home-top-gap: clamp(28px, 7vw, 32px);
+  --home-widget-radius: clamp(25px, 7vw, 31px);
+  --home-icon-radius: clamp(16px, 4.5vw, 20px);
+  --home-dock-side: clamp(14px, 3.6vw, 18px);
+  --home-dock-height: clamp(108px, 12.2dvh, 118px);
+  --home-dock-bottom: max(8px, calc(env(safe-area-inset-bottom) - 21px));
+  --home-dock-radius: clamp(30px, 7.4vw, 34px);
+}
+
+/* The system status bar remains native. Start content below it with the same
+   visual breathing room as the reference SpringBoard layout. */
+.home-content {
+  top: calc(env(safe-area-inset-top) + var(--home-top-gap));
+  right: max(var(--home-grid-side), env(safe-area-inset-right));
+  bottom: calc(var(--home-dock-height) + var(--home-dock-bottom) + 46px);
+  left: max(var(--home-grid-side), env(safe-area-inset-left));
+  padding: 0 0 24px;
+}
+
+/* Widgets and app icons share the exact same four-column master grid. A 2x2
+   widget therefore lands on the same outer edges as two icon columns. */
+.widget-area,
+.app-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--home-grid-gap);
+}
+
+.widget-area {
+  gap: var(--home-grid-gap);
+  margin: 0 0 var(--home-grid-gap);
+}
+
+.home-widget {
+  grid-column: span 2;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--home-widget-radius);
+  padding: clamp(15px, 4vw, 18px);
+}
+
+/* The reference uses the large-icon SpringBoard geometry. Icons fill their
+   grid tracks instead of floating as smaller squares inside oversized cells. */
+.app-grid {
+  row-gap: var(--home-grid-gap);
+  align-items: start;
+}
+
+.home-app {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  position: relative;
+  align-items: stretch;
+}
+
+.home-app-icon {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--home-icon-radius);
+  flex: 0 0 auto;
+}
+
+/* Labels stay optional, but no longer change the row geometry. This preserves
+   the same icon-to-icon alignment in both labelled and large-icon modes. */
+.home-app-label {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  width: calc(100% + 20px);
+  max-width: none;
+  margin: 0;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.home-app.no-label .home-app-label { display: none; }
+
+.app-delete-badge {
+  left: -6px;
+  top: -6px;
+}
+
+/* Compact, rounder dock proportions matching the reference capture while
+   still extending safely into the iPhone's lower rounded region. */
+.home-dock {
+  left: max(var(--home-dock-side), env(safe-area-inset-left));
+  right: max(var(--home-dock-side), env(safe-area-inset-right));
+  top: auto;
+  bottom: var(--home-dock-bottom);
+  height: var(--home-dock-height);
+  border-radius: var(--home-dock-radius);
+  padding: 9px clamp(14px, 2.7vw, 20px);
+}
+
+.home-dock .home-app {
+  width: auto;
+  aspect-ratio: auto;
+  align-items: center;
+}
+
+.home-dock .home-app-icon {
+  width: clamp(60px, 15.8vw, 72px);
+  height: clamp(60px, 15.8vw, 72px);
+  aspect-ratio: 1 / 1;
+  border-radius: clamp(15px, 4.1vw, 18px);
+}
+
+/* Keep the page indicator visually detached from the dock after the dock
+   becomes slightly more compact. */
+.page-dots {
+  bottom: calc(var(--home-dock-bottom) + var(--home-dock-height) + 19px);
+}
+
+/* Preserve a sensible preview on wider browsers without allowing phone-scale
+   spacing variables to grow with the desktop viewport. */
+@media (min-width: 700px) {
+  .home-screen {
+    --home-grid-side: 27px;
+    --home-grid-gap: 23px;
+    --home-top-gap: 31px;
+    --home-dock-side: 17px;
+  }
+}
