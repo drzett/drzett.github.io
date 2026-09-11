@@ -1,7 +1,7 @@
 {
-  "version": "1.4.1",
-  "build": "2026-09-11.6",
+  "version": "1.4.2",
+  "build": "2026-09-12.1",
   "channel": "stable",
-  "released": "2026-09-11",
-  "summary": "Refines SpringBoard jiggle timing and widget curvature, restyles the locale-aware calendar, adds a 192-preset offline Icon Studio, and hardens/instruments the iOS iframe touch path while keeping compatibility transforms opt-in for new imports."
+  "released": "2026-09-12",
+  "summary": "Hotfixes the fixed Home canvas and bottom Dock geometry, constrains drag placement to visible SpringBoard slots, removes accidental Home scrolling and clipped off-canvas icons, and replaces preset icons with a local Icon Designer featuring dark textured backgrounds, system emoji, custom text, scaling, positioning, and effects."
 }
