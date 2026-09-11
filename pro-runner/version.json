@@ -1,7 +1,7 @@
 {
-  "version": "1.2.0",
-  "build": "2026-09-11.2",
+  "version": "1.2.1",
+  "build": "2026-09-11.3",
   "channel": "stable",
   "released": "2026-09-11",
-  "summary": "Promotes the staged in-app updater and refined Home mode layout as a stable release, providing a clean upgrade path from 1.1.0."
+  "summary": "Limits the automatic software-update prompt to installed standalone app sessions while keeping update checks, workspace status, and Settings controls available in Safari."
 }
