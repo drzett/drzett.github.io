@@ -1,7 +1,7 @@
 {
-  "version": "1.4.0",
-  "build": "2026-09-11.5",
+  "version": "1.4.1",
+  "build": "2026-09-11.6",
   "channel": "stable",
   "released": "2026-09-11",
-  "summary": "Rebuilds Home mode on one mathematically shared SpringBoard grid, makes compatibility transforms opt-in for new imports, prevents horizontal drift, adds independent per-item jiggle timing, enables persistent grid-slot dragging for apps and widgets, and refines the dock geometry."
+  "summary": "Refines SpringBoard jiggle timing and widget curvature, restyles the locale-aware calendar, adds a 192-preset offline Icon Studio, and hardens/instruments the iOS iframe touch path while keeping compatibility transforms opt-in for new imports."
 }
