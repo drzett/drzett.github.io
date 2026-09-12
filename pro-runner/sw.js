@@ -1,7 +1,7 @@
-const PATCH_VERSION='1.5.4';
-const PATCH_BUILD='2026-09-12.6';
+const PATCH_VERSION='1.6.0';
+const PATCH_BUILD='2026-09-12.7';
 const PATCH_CACHE=`pro-runner-patch-${PATCH_VERSION}`;
-const PATCH_ASSETS=['./index.html','./update-ui.js','./update-ui-core.js','./springboard-v14.js','./v142-ui.js','./icon-designer.js','./v150-home.js','./v154-dock-hotfix.js','./v153-fixes.js','./v151-online.js','./v152-icon-fix.js','./v153-touch.js','./external-frame.html'];
+const PATCH_ASSETS=['./index.html','./update-ui.js','./update-ui-core.js','./springboard-v14.js','./v142-ui.js','./icon-designer.js','./v150-home.js','./v160-springboard.js','./v153-fixes.js','./v151-online.js','./v152-icon-fix.js','./v153-touch.js','./external-frame.html'];
 const PATCH_PATHS=new Set(PATCH_ASSETS.filter(x=>x!=='./index.html').map(x=>new URL(x,self.registration.scope).pathname));
 
 self.addEventListener('message',event=>{
