@@ -1,7 +1,6 @@
-const PATCH_VERSION='1.5.1';
+const PATCH_VERSION='1.5.2';
 const PATCH_CACHE='pro-runner-shell-1.4.0';
-const PATCH_ASSETS=['./update-ui-core.js','./springboard-v14.js','./v142-ui.js','./icon-designer.js','./v150-home.js','./v151-online.js','./v150-touch.js','./external-frame.html'];
-const EXTERNAL_ICON_CACHE='pro-runner-external-icons-v1';
+const PATCH_ASSETS=['./index.html','./update-ui-core.js','./springboard-v14.js','./v142-ui.js','./icon-designer.js','./v150-home.js','./v151-online.js','./v150-touch.js','./v152-icon-fix.js','./external-frame.html'];
 
 self.addEventListener('message',event=>{
   if(event.data?.type==='GET_VERSION'&&event.ports?.[0]){
@@ -21,28 +20,27 @@ self.addEventListener('activate',event=>{
   })());
 });
 
-async function externalIconResponse(request){
-  const requestURL=new URL(request.url);
-  const raw=requestURL.searchParams.get('url');
-  let remote;
-  try{remote=new URL(raw);if(!['https:','http:'].includes(remote.protocol))throw new Error('unsupported');}
-  catch{return new Response('',{status:400});}
-  const cache=await caches.open(EXTERNAL_ICON_CACHE);
-  const cached=await cache.match(request);
-  if(cached)return cached;
+async function patchedAppDocument(request){
+  const cache=await caches.open(PATCH_CACHE);
+  let response=null;
   try{
-    const response=await fetch(remote.href,{mode:'no-cors',credentials:'omit',referrerPolicy:'no-referrer',cache:'force-cache'});
-    if(response){await cache.put(request,response.clone()).catch(()=>{});return response;}
+    const network=await fetch(request,{cache:'no-store'});
+    if(network?.ok){response=network;cache.put(request,network.clone()).catch(()=>{});}
   }catch{}
-  return new Response('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"></svg>',{status:404,headers:{'Content-Type':'image/svg+xml','Cache-Control':'no-store'}});
+  if(!response)response=await cache.match(request,{ignoreSearch:true})||await cache.match('./index.html');
+  if(!response)return new Response('Pro Runner shell is unavailable.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
+  let html=await response.text();
+  html=html.replace("img-src 'self' data: blob:;","img-src 'self' data: blob: https:;");
+  html=html.replace(/<meta name="app-version" content="[^"]*">/,`<meta name="app-version" content="${PATCH_VERSION}">`);
+  html=html.replace(/<meta name="app-build" content="[^"]*">/,'<meta name="app-build" content="2026-09-12.4">');
+  const headers=new Headers(response.headers);headers.delete('Content-Length');headers.set('Cache-Control','no-store');headers.set('Content-Type','text/html; charset=utf-8');
+  return new Response(html,{status:200,headers});
 }
 
 self.addEventListener('fetch',event=>{
-  const url=new URL(event.request.url);
-  const scopePath=new URL(self.registration.scope).pathname;
-  if(url.origin===self.location.origin&&url.pathname===`${scopePath}__external_icon__`){
-    event.stopImmediatePropagation();
-    event.respondWith(externalIconResponse(event.request));
+  const url=new URL(event.request.url);const scope=new URL(self.registration.scope);const indexPath=`${scope.pathname}index.html`;
+  if(url.origin===scope.origin&&(event.request.mode==='navigate'||event.request.destination==='document')&&(url.pathname===scope.pathname||url.pathname===indexPath)){
+    event.stopImmediatePropagation();event.respondWith(patchedAppDocument(event.request));
   }
 });
 
