@@ -1,7 +1,7 @@
 {
-  "version": "1.5.4",
-  "build": "2026-09-12.6",
+  "version": "1.6.0",
+  "build": "2026-09-12.7",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Hotfixes Home-screen dock unpinning when the dock is full without changing the current dock alignment or layout geometry."
+  "summary": "Reworks Home editing around a viewport-level drag portal, adds drag-in/drag-out Dock placement, removes clipping at Home layout boundaries while dragging, and makes Pin to dock state changes reliable in both directions without altering the established Dock alignment geometry."
 }
