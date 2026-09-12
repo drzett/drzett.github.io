@@ -1,7 +1,7 @@
 {
-  "version": "1.5.1",
-  "build": "2026-09-12.3",
+  "version": "1.5.2",
+  "build": "2026-09-12.4",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Fixes deletion of online Home shortcuts, repairs website icon discovery by probing remote app icons directly, and opens embeddable online sites inside the clean Pro Runner viewer with an explicit browser fallback."
+  "summary": "Fixes online website icon discovery by allowing HTTPS icon images in the app shell, re-probing standard high-resolution icon paths, caching icon bytes locally when CORS permits, and automatically repairing existing website shortcuts that previously fell back to initials."
 }
