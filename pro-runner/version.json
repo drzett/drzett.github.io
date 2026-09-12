@@ -1,7 +1,7 @@
 {
-  "version": "1.6.0",
-  "build": "2026-09-12.7",
+  "version": "1.6.1",
+  "build": "2026-09-12.8",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Reworks Home editing around a viewport-level drag portal, adds drag-in/drag-out Dock placement, removes clipping at Home layout boundaries while dragging, and makes Pin to dock state changes reliable in both directions without altering the established Dock alignment geometry."
+  "summary": "Restores magnetic Home-grid snapping and target highlights on top of the 1.6 drag portal, makes Dock drops occupy deterministic slots without overlap, and preserves the existing tuned Dock geometry."
 }
