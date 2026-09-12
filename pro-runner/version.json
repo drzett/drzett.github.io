@@ -3,5 +3,5 @@
   "build": "2026-09-12.9",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Rollback release restoring the proven Pro Runner 1.6.0 runtime after regressions in 1.6.1. Website shortcuts, icon discovery, Home editing and Dock behavior return to the 1.6.0 baseline while preserving user data."
+  "summary": "Rollback release restoring the known-good Pro Runner 1.6.0 runtime after regressions in 1.6.1. Website shortcuts, icon discovery, Home editing and Dock behavior return to the 1.6.0 baseline while preserving user data."
 }
