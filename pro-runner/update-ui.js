@@ -1,5 +1,5 @@
-const releaseVersion='1.5.3';
-const releaseBuild='2026-09-12.5';
+const releaseVersion='1.5.4';
+const releaseBuild='2026-09-12.6';
 const versionMeta=document.querySelector('meta[name="app-version"]');
 const buildMeta=document.querySelector('meta[name="app-build"]');
 if(versionMeta)versionMeta.content=releaseVersion;
@@ -12,8 +12,9 @@ if(installed)installed.textContent=releaseVersion;
   await import('./v142-ui.js');
   await import('./icon-designer.js');
   await import('./v150-home.js');
+  await import('./v154-dock-hotfix.js');
   await import('./v153-fixes.js');
   await import('./v151-online.js');
   await import('./v152-icon-fix.js');
   await import('./v153-touch.js');
-})().catch(error=>console.error('Pro Runner 1.5.3 bootstrap failed.',error));
+})().catch(error=>console.error('Pro Runner 1.5.4 bootstrap failed.',error));

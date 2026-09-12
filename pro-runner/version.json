@@ -1,7 +1,7 @@
 {
-  "version": "1.5.3",
-  "build": "2026-09-12.5",
+  "version": "1.5.4",
+  "build": "2026-09-12.6",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Unifies dock state, fixes Pro Runner and dock placement, makes Home long-press tolerant and prevents long-hold launches, restores Screen Wake Lock controls, and hardens iOS viewer scrolling with improved cancellation diagnostics and recovery."
+  "summary": "Hotfixes Home-screen dock unpinning when the dock is full without changing the current dock alignment or layout geometry."
 }
