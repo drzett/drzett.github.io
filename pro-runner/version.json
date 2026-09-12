@@ -1,7 +1,7 @@
 {
-  "version": "1.6.1",
-  "build": "2026-09-12.8",
+  "version": "1.6.2",
+  "build": "2026-09-12.9",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Restores magnetic Home-grid snapping and target highlights on top of the 1.6 drag portal, makes Dock drops occupy deterministic slots without overlap, and preserves the existing tuned Dock geometry."
+  "summary": "Rollback release restoring the proven Pro Runner 1.6.0 runtime after regressions in 1.6.1. Website shortcuts, icon discovery, Home editing and Dock behavior return to the 1.6.0 baseline while preserving user data."
 }
