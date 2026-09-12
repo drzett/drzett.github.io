@@ -1,6 +1,6 @@
-const PATCH_VERSION='1.5.0';
+const PATCH_VERSION='1.5.1';
 const PATCH_CACHE='pro-runner-shell-1.4.0';
-const PATCH_ASSETS=['./update-ui-core.js','./springboard-v14.js','./v142-ui.js','./icon-designer.js','./v150-home.js','./v150-online.js','./v150-touch.js'];
+const PATCH_ASSETS=['./update-ui-core.js','./springboard-v14.js','./v142-ui.js','./icon-designer.js','./v150-home.js','./v151-online.js','./v150-touch.js','./external-frame.html'];
 const EXTERNAL_ICON_CACHE='pro-runner-external-icons-v1';
 
 self.addEventListener('message',event=>{
