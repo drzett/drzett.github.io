@@ -1,7 +1,7 @@
 {
-  "version": "1.4.2",
-  "build": "2026-09-12.1",
+  "version": "1.5.0",
+  "build": "2026-09-12.2",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Hotfixes the fixed Home canvas and bottom Dock geometry, constrains drag placement to visible SpringBoard slots, removes accidental Home scrolling and clipped off-canvas icons, and replaces preset icons with a local Icon Designer featuring dark textured backgrounds, system emoji, custom text, scaling, positioning, and effects."
+  "summary": "Introduces a compact two-layer Icon Designer, customizable Pro Runner Home icon with Dock pinning, online website shortcuts with best-effort cached favicons, native iOS long-press suppression on Home icons, and lower-overhead touch diagnostics with viewer-overlay reset mitigation."
 }
