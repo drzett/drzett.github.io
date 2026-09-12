@@ -1,7 +1,7 @@
 {
-  "version": "1.5.0",
-  "build": "2026-09-12.2",
+  "version": "1.5.1",
+  "build": "2026-09-12.3",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Introduces a compact two-layer Icon Designer, customizable Pro Runner Home icon with Dock pinning, online website shortcuts with best-effort cached favicons, native iOS long-press suppression on Home icons, and lower-overhead touch diagnostics with viewer-overlay reset mitigation."
+  "summary": "Fixes deletion of online Home shortcuts, repairs website icon discovery by probing remote app icons directly, and opens embeddable online sites inside the clean Pro Runner viewer with an explicit browser fallback."
 }
