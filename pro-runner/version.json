@@ -1,7 +1,7 @@
 {
-  "version": "1.5.2",
-  "build": "2026-09-12.4",
+  "version": "1.5.3",
+  "build": "2026-09-12.5",
   "channel": "stable",
   "released": "2026-09-12",
-  "summary": "Fixes online website icon discovery by allowing HTTPS icon images in the app shell, re-probing standard high-resolution icon paths, caching icon bytes locally when CORS permits, and automatically repairing existing website shortcuts that previously fell back to initials."
+  "summary": "Unifies dock state, fixes Pro Runner and dock placement, makes Home long-press tolerant and prevents long-hold launches, restores Screen Wake Lock controls, and hardens iOS viewer scrolling with improved cancellation diagnostics and recovery."
 }
