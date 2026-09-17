@@ -93,4 +93,15 @@ test('project settings provide the icon designer during Home editing', async ({ 
   await item.dispatchEvent('pointerup', { pointerId: 9, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(750);
   await item.click(); await expect(page.locator('#projectDialog')).toBeVisible(); await page.locator('#designIconButton').click();
   await expect(page.locator('#iconDesignerDialog')).toBeVisible();
+  await expect(page.locator('#iconDesignerDialog .designer-text')).toHaveCount(2);
+  await expect(page.locator('#iconDesignerDialog .designer-text').first()).not.toHaveAttribute('maxlength');
+});
+
+test('the Pro Runner return icon has its own Home edit configuration', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  const item = page.locator('.home-app[data-runner="true"]'); const box = await item.boundingBox();
+  await item.dispatchEvent('pointerdown', { pointerId: 10, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(650);
+  await item.dispatchEvent('pointerup', { pointerId: 10, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(750);
+  await item.click(); await expect(page.locator('#runnerSettingsDialog')).toBeVisible();
+  await expect(page.locator('#runnerSettingsDialog .runner-design')).toBeVisible();
 });

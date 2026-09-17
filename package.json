@@ -6,7 +6,7 @@
     "test": "node --test tests/core.test.js && playwright test",
     "test:chromium": "playwright test --project=chromium",
     "test:webkit": "playwright test --project=webkit",
-    "check": "node --check pro-runner/main.js && node --check pro-runner/sw.js && node --check pro-runner/core/storage.js && node --check pro-runner/ui/home.js"
+    "check": "node --check pro-runner/main.js && node --check pro-runner/sw.js && node --check pro-runner/core/storage.js && node --check pro-runner/ui/home.js && node --check pro-runner/ui/icon-designer.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0"

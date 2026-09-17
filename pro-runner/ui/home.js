@@ -48,7 +48,7 @@ export function createHomeController({ home, content, grid, dock, done, load, sa
   home.addEventListener('pointerdown', (event) => { const node = event.target.closest('[data-home-item="true"]'); if (!node || event.button > 0 || event.target.closest('button')) return; start(event, node); }, true);
   home.addEventListener('pointermove', move, { capture: true, passive: false });
   home.addEventListener('pointerup', finish, true); home.addEventListener('pointercancel', finish, true);
-  home.addEventListener('click', (event) => { const node = event.target.closest('[data-home-item="true"]'); if (!node) return; if (performance.now() < suppressUntil) { event.preventDefault(); event.stopImmediatePropagation(); return; } if (editing) { if (event.target.closest('.app-delete-badge')) onDelete(node.dataset.id); else if (node.dataset.id) onEdit(node.dataset.id); return; } if (node.dataset.id) onOpen(node.dataset.id); }, true);
+  home.addEventListener('click', (event) => { const node = event.target.closest('[data-home-item="true"]'); if (!node) return; if (performance.now() < suppressUntil) { event.preventDefault(); event.stopImmediatePropagation(); return; } if (editing) { if (event.target.closest('.app-delete-badge')) onDelete(node.dataset.id); else if (node.dataset.id) onEdit(node.dataset.id); else if (node.dataset.runner === 'true') onEdit('__runner__'); return; } if (node.dataset.id) onOpen(node.dataset.id); else if (node.dataset.runner === 'true') onOpen('__runner__'); }, true);
   done.addEventListener('click', () => setEditing(false)); window.addEventListener('resize', () => render(), { passive: true });
   return { render, enterEdit: () => setEditing(true), exitEdit: () => setEditing(false), isEditing: () => editing };
 }
