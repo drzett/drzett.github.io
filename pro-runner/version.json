@@ -1,7 +1,7 @@
 {
-  "version": "1.6.2",
-  "build": "2026-09-12.9",
+  "version": "2.0.0",
+  "build": "2026-09-18.1",
   "channel": "stable",
-  "released": "2026-09-12",
-  "summary": "Rollback release restoring the known-good Pro Runner 1.6.0 runtime after regressions in 1.6.1. Website shortcuts, icon discovery, Home editing and Dock behavior return to the 1.6.0 baseline while preserving user data."
+  "released": "2026-09-18",
+  "summary": "Architecture refactor with canonical storage ownership, a standalone Home controller, and a static ESM runtime without historical patch imports. Existing local projects, website shortcuts, icons, settings, and layouts are migrated in place."
 }
