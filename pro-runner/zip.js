@@ -1,8 +1,3 @@
-import './springboard-v14.js';
-
-document.querySelector('meta[name="app-version"]')?.setAttribute('content', '1.4.0');
-document.querySelector('meta[name="app-build"]')?.setAttribute('content', '2026-09-11.5');
-
 const SIG_EOCD = 0x06054b50;
 const SIG_CDIR = 0x02014b50;
 const SIG_LOCAL = 0x04034b50;

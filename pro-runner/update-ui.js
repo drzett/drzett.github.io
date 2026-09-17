@@ -8,13 +8,4 @@ const installed=document.getElementById('installedVersionValue');
 if(installed)installed.textContent=releaseVersion;
 (async()=>{
   await import('./update-ui-core.js');
-  await import('./springboard-v14.js');
-  await import('./v142-ui.js');
-  await import('./icon-designer.js');
-  await import('./v150-home.js');
-  await import('./v160-springboard.js');
-  await import('./v153-fixes.js');
-  await import('./v151-online.js');
-  await import('./v152-icon-fix.js');
-  await import('./v153-touch.js');
 })().catch(error=>console.error('Pro Runner 1.6.2 bootstrap failed.',error));

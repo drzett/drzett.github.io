@@ -216,3 +216,10 @@
     --dock-side: 17px;
   }
 }
+
+.pro-drag-ghost { position: fixed; z-index: 10000; left: 0; top: 0; pointer-events: none; filter: drop-shadow(0 16px 28px rgba(0,0,0,.34)); will-change: transform; }
+.pro-drag-ghost .app-delete-badge { display: none !important; }
+.portal-drag-source > .home-app-icon { opacity: .2; }
+.pro-portal-grid-marker { pointer-events: none; z-index: 1; border-radius: 24%; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.34); }
+.pro-portal-grid-marker.blocked { background: rgba(255,95,95,.08); box-shadow: inset 0 0 0 1.5px rgba(255,120,120,.45); }
+.home-dock-drop { box-shadow: inset 0 0 0 2px rgba(255,255,255,.46), 0 8px 26px rgba(0,0,0,.16); }
