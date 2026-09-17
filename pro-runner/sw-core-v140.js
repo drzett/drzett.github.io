@@ -10,7 +10,7 @@ const VIRTUAL_PREFIX = '__site/';
 
 const SHELL_ASSETS = [
   './', './index.html', './styles.css', './home-fidelity.css', './main.js', './bridge.js', './update-ui.js', './update-ui-core.js',
-  './core/storage.js', './core/projects.js', './core/home-state.js', './ui/home.js', './ui/icons.js', './external-frame.html', './manifest.webmanifest', './zip.js', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
+  './core/storage.js', './core/projects.js', './core/home-state.js', './ui/home.js', './ui/icons.js', './ui/icon-designer.js', './external-frame.html', './manifest.webmanifest', './zip.js', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {

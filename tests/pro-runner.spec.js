@@ -81,6 +81,16 @@ test('an icon can occupy an explicitly chosen empty dock slot', async ({ page })
 test('the calendar widget renders its current month grid', async ({ page }) => {
   await seedLegacy(page); await page.goto('./');
   await expect(page.locator('.calendar-month')).not.toBeEmpty();
+  await expect(page.locator('.mini-weekdays span')).toHaveCount(7);
   expect(await page.locator('.mini-month span').count()).toBeGreaterThan(28);
   await expect(page.locator('.mini-month .today')).toHaveCount(1);
+});
+
+test('project settings provide the icon designer during Home editing', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  const item = page.locator('#homeAppGrid .home-app[data-id="web-1"]'); await expect(item).toBeVisible(); const box = await item.boundingBox();
+  await item.dispatchEvent('pointerdown', { pointerId: 9, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(650);
+  await item.dispatchEvent('pointerup', { pointerId: 9, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(750);
+  await item.click(); await expect(page.locator('#projectDialog')).toBeVisible(); await page.locator('#designIconButton').click();
+  await expect(page.locator('#iconDesignerDialog')).toBeVisible();
 });
