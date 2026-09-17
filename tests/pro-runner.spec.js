@@ -1,16 +1,20 @@
 import { expect, test } from '@playwright/test';
 
 async function seedLegacy(page) {
-  await page.addInitScript(() => {
-    if (sessionStorage.getItem('pro-runner-test-seeded')) return;
-    sessionStorage.setItem('pro-runner-test-seeded', '1');
+  await page.goto('./external-frame.html');
+  await page.evaluate(async () => new Promise((resolve, reject) => {
     localStorage.setItem('pro-runner-settings', JSON.stringify({ startView: 'home', iconLabels: true }));
     localStorage.setItem('pro-runner-home-layout-v2', JSON.stringify({ version: 2, positions: { 'project:local-1': { col: 2, row: 1 }, 'project:web-1': { col: 3, row: 1 } } }));
-    indexedDB.deleteDatabase('pro-runner-v1');
-    const request = indexedDB.open('pro-runner-v1', 1);
+    const deletion = indexedDB.deleteDatabase('pro-runner-v1');
+    deletion.onerror = () => reject(deletion.error);
+    deletion.onblocked = () => reject(new Error('Test database deletion was blocked.'));
+    deletion.onsuccess = () => {
+      const request = indexedDB.open('pro-runner-v1', 1);
     request.onupgradeneeded = () => { const db = request.result; db.createObjectStore('projects', { keyPath: 'id' }); const files = db.createObjectStore('files', { keyPath: 'key' }); files.createIndex('byProject', 'projectId'); db.createObjectStore('meta', { keyPath: 'key' }); db.createObjectStore('assets', { keyPath: 'key' }); };
-    request.onsuccess = () => { const db = request.result; const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').put({ id: 'local-1', name: 'Local fixture', kind: 'file', entryPath: 'index.html', sourceName: 'fixture.html', fileCount: 1, totalBytes: 16, dock: true, importedAt: 1 }); tx.objectStore('projects').put({ id: 'web-1', name: 'Website fixture', kind: 'web', externalUrl: 'https://example.test/app', sourceName: 'https://example.test/app', entryPath: 'example.test', fileCount: 0, totalBytes: 0, importedAt: 2 }); tx.oncomplete = () => db.close(); };
-  });
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => { const db = request.result; const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').put({ id: 'local-1', name: 'Local fixture', kind: 'file', entryPath: 'index.html', sourceName: 'fixture.html', fileCount: 1, totalBytes: 16, dock: true, importedAt: 1 }); tx.objectStore('projects').put({ id: 'web-1', name: 'Website fixture', kind: 'web', externalUrl: 'https://example.test/app', sourceName: 'https://example.test/app', entryPath: 'example.test', fileCount: 0, totalBytes: 0, importedAt: 2 }); tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => reject(tx.error); };
+    };
+  }));
 }
 
 test('boots without exceptions and migrates legacy project data', async ({ page }) => {
@@ -45,4 +49,19 @@ test('website entries open in the external viewer without changing their type or
   await expect(page.locator('#projectFrame')).toHaveAttribute('src', /external-frame\.html\?url=https%3A%2F%2Fexample\.test%2Fapp/);
   const project = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('projects').objectStore('projects').get('web-1'); get.onsuccess = () => resolve(get.result); }; }));
   expect(project.type).toBe('website'); expect(project.externalUrl).toBe('https://example.test/app');
+});
+
+test('a dock item can return to a visible grid slot during edit mode', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  const item = page.locator('#homeDock .home-app[data-id="local-1"]');
+  const before = await item.boundingBox(); const grid = await page.locator('.home-content').boundingBox();
+  await item.dispatchEvent('pointerdown', { pointerId: 7, clientX: before.x + 20, clientY: before.y + 20, button: 0 });
+  await page.waitForTimeout(650);
+  await item.dispatchEvent('pointerup', { pointerId: 7, clientX: before.x + 20, clientY: before.y + 20, button: 0 });
+  await page.waitForTimeout(750);
+  await page.mouse.move(before.x + 20, before.y + 20); await page.mouse.down();
+  await page.mouse.move(grid.x + grid.width * .75, grid.y + grid.height * .7, { steps: 4 }); await page.mouse.up();
+  await expect(page.locator('#homeAppGrid .home-app[data-id="local-1"]')).toBeVisible();
+  const home = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('meta').objectStore('meta').get('home-state-v3'); get.onsuccess = () => resolve(get.result.value); }; }));
+  expect(home.dock).not.toContain('project:local-1');
 });

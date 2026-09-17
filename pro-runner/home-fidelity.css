@@ -191,9 +191,12 @@
 }
 .home-dock .home-app {
   width: auto;
-  height: auto;
+  height: min(100%, 72px);
   aspect-ratio: auto;
   align-items: center;
+  align-self: center;
+  display: grid;
+  place-items: center;
   justify-self: stretch;
 }
 .home-dock .home-app-icon {

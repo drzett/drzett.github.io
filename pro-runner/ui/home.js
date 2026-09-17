@@ -5,11 +5,23 @@ export function createHomeController({ home, content, grid, dock, done, load, sa
   const itemKey = (node) => node.dataset.runner === 'true' ? 'runner' : node.dataset.id ? `project:${node.dataset.id}` : node.dataset.widget ? `widget:${node.dataset.widget}` : null;
   const itemSize = (node) => node.dataset.widget ? { w: 2, h: 2 } : { w: 1, h: 1 };
   const gridMetrics = () => { const rect = content.getBoundingClientRect(); const style = getComputedStyle(content); const gap = parseFloat(style.columnGap) || 0; const rowGap = parseFloat(style.rowGap) || gap; const cell = (rect.width - gap * 3) / 4; return { rect, gap, rowGap, cell, rows: Math.max(2, Math.floor((rect.height + rowGap) / Math.max(1, cell + rowGap))) }; };
-  const items = () => [...content.querySelectorAll('[data-home-item="true"]')];
+  // Dock children live outside .home-content, so the controller must always
+  // enumerate the entire Home surface before moving an item between zones.
+  const items = () => [...home.querySelectorAll('[data-home-item="true"]')];
   const gridItems = () => items().filter((node) => node.parentElement !== dock);
   const isDocked = (node, state) => state.dock.includes(itemKey(node));
 
-  function setEditing(value) { editing = value; home.classList.toggle('springboard-editing', value); done.classList.toggle('hidden', !value); for (const node of items()) node.classList.toggle('wiggle', value); }
+  function setEditing(value) {
+    editing = value; home.classList.toggle('springboard-editing', value); done.classList.toggle('hidden', !value);
+    for (const [index, node] of items().entries()) {
+      const seed = (index * 37 + String(itemKey(node)).length * 17) % 5;
+      node.style.setProperty('--jiggle-shift', `${0.45 + seed * 0.07}px`);
+      node.style.setProperty('--jiggle-angle', `${0.65 + seed * 0.08}deg`);
+      node.style.setProperty('--jiggle-duration', `${145 + seed * 9}ms`);
+      node.style.setProperty('--jiggle-delay', `${-seed * 23}ms`);
+      node.classList.toggle('wiggle', value);
+    }
+  }
   function position(node, value, size) { node.style.gridColumn = `${value.col} / span ${size.w}`; node.style.gridRow = `${value.row} / span ${size.h}`; }
   function clearPosition(node) { node.style.removeProperty('grid-column'); node.style.removeProperty('grid-row'); }
   function normalize(state) {
@@ -25,7 +37,7 @@ export function createHomeController({ home, content, grid, dock, done, load, sa
   }
   function markerAt(position, size, allowed) { if (!marker) { marker = document.createElement('div'); marker.className = 'pro-portal-grid-marker'; content.append(marker); } marker.classList.toggle('blocked', !allowed); marker.style.gridColumn = `${position.col} / span ${size.w}`; marker.style.gridRow = `${position.row} / span ${size.h}`; }
   function clearVisual() { marker?.remove(); marker = null; ghost?.remove(); ghost = null; home.classList.remove('home-dock-drop'); }
-  function target(event, node) { const metric = gridMetrics(); const size = itemSize(node); const dockRect = dock.getBoundingClientRect(); if (!node.dataset.widget && event.clientX >= dockRect.left - 12 && event.clientX <= dockRect.right + 12 && event.clientY >= dockRect.top - 12 && event.clientY <= dockRect.bottom + 12) return { zone: 'dock', index: Math.max(0, Math.min(4, Math.round((event.clientX - dockRect.left) / Math.max(1, dockRect.width) * 4))), size };
+  function target(event, node) { const metric = gridMetrics(); const size = itemSize(node); const dockRect = dock.getBoundingClientRect(); if (!node.dataset.widget && event.clientX >= dockRect.left - 12 && event.clientX <= dockRect.right + 12 && event.clientY >= dockRect.top - 12 && event.clientY <= dockRect.bottom + 12) { const style = getComputedStyle(dock); const padding = parseFloat(style.paddingLeft) || 0; const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 0; const cell = (dockRect.width - padding * 2 - gap * 3) / 4; const index = Math.round((event.clientX - dockRect.left - padding - cell / 2) / Math.max(1, cell + gap)); return { zone: 'dock', index: Math.max(0, Math.min(3, index)), size }; }
     const left = event.clientX - drag.offsetX - metric.rect.left; const top = event.clientY - drag.offsetY - metric.rect.top; const position = { col: Math.max(1, Math.min(GRID_COLUMNS - size.w + 1, Math.round(left / (metric.cell + metric.gap)) + 1)), row: Math.max(1, Math.min(metric.rows - size.h + 1, Math.round(top / (metric.cell + metric.rowGap)) + 1)) }; return { zone: 'grid', position, size, rows: metric.rows };
   }
   function start(event, node) { const rect = (node.querySelector('.home-app-icon') || node).getBoundingClientRect(); drag = { node, key: itemKey(node), pointer: event.pointerId, x: event.clientX, y: event.clientY, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, started: false, longFired: false, longTimer: null }; drag.longTimer = setTimeout(() => { if (drag && !drag.started) { drag.longFired = true; setEditing(true); } }, 560); }

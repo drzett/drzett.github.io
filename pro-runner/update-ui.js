@@ -1,5 +1,5 @@
 const releaseVersion='2.0.0';
-const releaseBuild='2026-09-18.1';
+const releaseBuild='2026-09-18.2';
 const versionMeta=document.querySelector('meta[name="app-version"]');
 const buildMeta=document.querySelector('meta[name="app-build"]');
 if(versionMeta)versionMeta.content=releaseVersion;
