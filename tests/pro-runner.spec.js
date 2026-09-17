@@ -54,6 +54,7 @@ test('website entries open in the external viewer without changing their type or
 test('a dock item can return to a visible grid slot during edit mode', async ({ page }) => {
   await seedLegacy(page); await page.goto('./');
   const item = page.locator('#homeDock .home-app[data-id="local-1"]');
+  await expect(item).toBeVisible();
   const before = await item.boundingBox(); const grid = await page.locator('.home-content').boundingBox();
   await item.dispatchEvent('pointerdown', { pointerId: 7, clientX: before.x + 20, clientY: before.y + 20, button: 0 });
   await page.waitForTimeout(650);
@@ -64,4 +65,22 @@ test('a dock item can return to a visible grid slot during edit mode', async ({ 
   await expect(page.locator('#homeAppGrid .home-app[data-id="local-1"]')).toBeVisible();
   const home = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('meta').objectStore('meta').get('home-state-v3'); get.onsuccess = () => resolve(get.result.value); }; }));
   expect(home.dock).not.toContain('project:local-1');
+});
+
+test('an icon can occupy an explicitly chosen empty dock slot', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  const item = page.locator('#homeAppGrid .home-app[data-id="web-1"]'); await expect(item).toBeVisible(); const before = await item.boundingBox(); const dock = await page.locator('#homeDock').boundingBox();
+  await item.dispatchEvent('pointerdown', { pointerId: 8, clientX: before.x + 20, clientY: before.y + 20, button: 0 }); await page.waitForTimeout(650);
+  await item.dispatchEvent('pointerup', { pointerId: 8, clientX: before.x + 20, clientY: before.y + 20, button: 0 }); await page.waitForTimeout(750);
+  await page.mouse.move(before.x + 20, before.y + 20); await page.mouse.down(); await page.mouse.move(dock.x + dock.width * .65, dock.y + dock.height / 2, { steps: 4 }); await page.mouse.up();
+  await expect(page.locator('#homeDock .home-app[data-id="web-1"]')).toHaveCSS('grid-column-start', '3');
+  const home = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('meta').objectStore('meta').get('home-state-v3'); get.onsuccess = () => resolve(get.result.value); }; }));
+  expect(home.dockSlots[2]).toBe('project:web-1');
+});
+
+test('the calendar widget renders its current month grid', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  await expect(page.locator('.calendar-month')).not.toBeEmpty();
+  expect(await page.locator('.mini-month span').count()).toBeGreaterThan(28);
+  await expect(page.locator('.mini-month .today')).toHaveCount(1);
 });

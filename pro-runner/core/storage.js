@@ -12,7 +12,7 @@ export const defaultSettings = Object.freeze({
   clockWidget: true, calendarWidget: true, defaultCompat: true, defaultDebug: false,
 });
 
-export const defaultHomeState = () => ({ version: 3, positions: {}, dock: [] });
+export const defaultHomeState = () => ({ version: 3, positions: {}, dock: [], dockSlots: [null, null, null, null] });
 
 function requestValue(request) {
   return new Promise((resolve, reject) => {
@@ -115,5 +115,12 @@ export async function migrateLegacyData() {
 
 export async function loadSettings() { return { ...defaultSettings, ...((await read(STORES.meta, META.settings))?.value || {}) }; }
 export async function saveSettings(value) { await write(STORES.meta, { key: META.settings, value: { ...defaultSettings, ...value } }); }
-export async function loadHomeState() { return { ...defaultHomeState(), ...((await read(STORES.meta, META.home))?.value || {}) }; }
-export async function saveHomeState(value) { await write(STORES.meta, { key: META.home, value: { ...defaultHomeState(), ...value } }); }
+function normalizeHomeState(value = {}) {
+  const state = { ...defaultHomeState(), ...value };
+  state.dockSlots = Array.isArray(value.dockSlots) ? value.dockSlots.slice(0, 4).map((key) => key || null) : [...state.dock.slice(0, 4), null, null, null, null].slice(0, 4);
+  state.dock = state.dockSlots.filter(Boolean);
+  return state;
+}
+
+export async function loadHomeState() { return normalizeHomeState((await read(STORES.meta, META.home))?.value || {}); }
+export async function saveHomeState(value) { await write(STORES.meta, { key: META.home, value: normalizeHomeState(value) }); }
