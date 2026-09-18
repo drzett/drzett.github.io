@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { firstFree, itemCells, moveDockItem, validPosition } from '../pro-runner/core/home-state.js';
 import { normalizeProject, defaultHomeState } from '../pro-runner/core/storage.js';
+import { websiteIconCandidates } from '../pro-runner/core/projects.js';
 import { normalizeIconConfig, renderIconSvg } from '../pro-runner/ui/icon-designer.js';
 
 test('normalizes legacy local and website records without losing website URLs', () => {
@@ -26,4 +27,11 @@ test('icon designer migrates single-layer designs into two independent layers', 
   assert.equal(config.layers[0].rotation, 8);
   assert.equal(config.layers[1].text, '');
   assert.match(renderIconSvg({ background: 'violet', layers: [{ text: 'A', scale: 80, x: 0, y: 0, rotation: 0 }, { text: 'B', scale: 40, x: 20, y: 20, rotation: 12 }] }), />A<.*>B</);
+});
+
+test('website icon discovery includes high-resolution and favicon fallbacks', () => {
+  const candidates = websiteIconCandidates('https://example.test/path');
+  assert.equal(candidates[0], 'https://example.test/apple-touch-icon.png');
+  assert.ok(candidates.includes('https://example.test/android-chrome-512x512.png'));
+  assert.ok(candidates.includes('https://example.test/favicon.ico'));
 });

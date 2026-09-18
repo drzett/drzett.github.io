@@ -46,7 +46,7 @@ test('website entries open in the external viewer without changing their type or
   await seedLegacy(page); await page.goto('./');
   await page.locator('.home-app[data-id="web-1"]').click();
   await expect(page.locator('#viewer')).toBeVisible();
-  await expect(page.locator('#projectFrame')).toHaveAttribute('src', /external-frame\.html\?url=https%3A%2F%2Fexample\.test%2Fapp/);
+  await expect(page.locator('#projectFrame')).toHaveAttribute('src', 'https://example.test/app');
   const project = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('projects').objectStore('projects').get('web-1'); get.onsuccess = () => resolve(get.result); }; }));
   expect(project.type).toBe('website'); expect(project.externalUrl).toBe('https://example.test/app');
 });
@@ -99,9 +99,17 @@ test('project settings provide the icon designer during Home editing', async ({ 
 
 test('the Pro Runner return icon has its own Home edit configuration', async ({ page }) => {
   await seedLegacy(page); await page.goto('./');
-  const item = page.locator('.home-app[data-runner="true"]'); const box = await item.boundingBox();
+  const item = page.locator('.home-app[data-runner="true"]'); await expect(item).toBeVisible(); const box = await item.boundingBox();
   await item.dispatchEvent('pointerdown', { pointerId: 10, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(650);
   await item.dispatchEvent('pointerup', { pointerId: 10, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(750);
   await item.click(); await expect(page.locator('#runnerSettingsDialog')).toBeVisible();
   await expect(page.locator('#runnerSettingsDialog .runner-design')).toBeVisible();
+});
+
+test('delete badges stay hidden until Home edit mode starts', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  await expect(page.locator('.home-app[data-id="local-1"] .app-delete-badge')).toBeHidden();
+  const item = page.locator('.home-app[data-id="local-1"]'); const box = await item.boundingBox();
+  await item.dispatchEvent('pointerdown', { pointerId: 11, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(650);
+  await expect(page.locator('.home-app[data-id="local-1"] .app-delete-badge')).toBeVisible();
 });

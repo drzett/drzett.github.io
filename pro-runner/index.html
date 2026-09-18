@@ -11,7 +11,7 @@
   <meta name="format-detection" content="telephone=no">
   <meta name="app-version" content="1.3.0">
   <meta name="app-build" content="2026-09-11.4">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; font-src 'self' data:; connect-src 'self' https: http:; frame-src 'self' blob: data: https: http:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>Pro Runner</title>
   <meta name="description" content="A local-first runtime and workspace for static web applications.">
   <link rel="manifest" href="./manifest.webmanifest">
@@ -110,6 +110,7 @@
       <div id="viewerMenu" class="viewer-menu hidden">
         <div class="viewer-menu-title"><strong id="viewerProjectName">Project</strong><small id="viewerProjectPath">index.html</small></div>
         <button id="viewerReload" type="button">Reload</button>
+        <button id="viewerBrowser" type="button">Open in browser</button>
         <button id="viewerDebug" type="button">Diagnostics</button>
         <button id="viewerHome" type="button">Home screen</button>
         <button id="viewerWorkspace" type="button">Workspace</button>

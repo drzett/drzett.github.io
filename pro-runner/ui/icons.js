@@ -14,7 +14,7 @@ function objectURL(key, bytes, type) {
 export async function renderIcon(node, project) {
   node.replaceChildren(); node.style.background = gradient(project.name);
   const custom = await read(STORES.assets, `icon:${project.id}`).catch(() => null);
-  const src = custom?.bytes ? objectURL(`icon:${project.id}`, custom.bytes, custom.type) : project.type === 'local' && project.iconPath ? projectURL(project.id, project.iconPath) : project.remoteIconUrl;
+  const src = custom?.bytes ? objectURL(`icon:${project.id}:${custom.updatedAt || custom.bytes.byteLength}`, custom.bytes, custom.type) : project.type === 'local' && project.iconPath ? projectURL(project.id, project.iconPath) : project.remoteIconUrl;
   if (src) {
     const image = document.createElement('img'); image.alt = ''; image.draggable = false; image.referrerPolicy = 'no-referrer'; image.src = src;
     image.addEventListener('error', () => fallback(node, project), { once: true }); node.append(image); return;

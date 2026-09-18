@@ -15,7 +15,7 @@ export function normalizeURL(raw) {
 
 export function websiteIconCandidates(pageURL) {
   const url = new URL(pageURL);
-  return ['/apple-touch-icon.png', '/android-chrome-512x512.png', '/android-chrome-192x192.png', '/icon-512.png', '/icon-192.png', '/favicon-96x96.png', '/favicon.png', '/favicon.ico'].map((path) => new URL(path, url.origin).href);
+  return ['/apple-touch-icon.png', '/apple-touch-icon-precomposed.png', '/android-chrome-512x512.png', '/android-chrome-192x192.png', '/logo-512x512.png', '/logo-256x256.png', '/logo-180x180.png', '/icon-512.png', '/icon-192.png', '/icons/icon-512.png', '/icons/icon-192.png', '/favicon-512x512.png', '/favicon-256x256.png', '/favicon-192x192.png', '/favicon-96x96.png', '/favicon-64x64.png', '/favicon-48x48.png', '/favicon-32x32.png', '/favicon.svg', '/favicon.png', '/favicon.ico'].map((path) => new URL(path, url.origin).href);
 }
 
 function probeImage(url, timeout = 1800) {
@@ -25,6 +25,30 @@ function probeImage(url, timeout = 1800) {
 export async function discoverWebsiteIcon(pageURL) {
   const icons = await Promise.all(websiteIconCandidates(pageURL).map((url) => probeImage(url)));
   return icons.filter(Boolean).sort((a, b) => b.area - a.area)[0]?.url || null;
+}
+
+async function cacheWebsiteIcon(project, remoteURL) {
+  if (!remoteURL) return false;
+  try {
+    const response = await fetch(remoteURL, { mode: 'cors', credentials: 'omit', cache: 'no-cache', referrerPolicy: 'no-referrer' });
+    if (!response.ok) return false;
+    const bytes = await response.arrayBuffer();
+    if (!bytes.byteLength) return false;
+    const header = response.headers.get('content-type') || '';
+    const type = /^image\//i.test(header) ? header : remoteURL.includes('.svg') ? 'image/svg+xml' : remoteURL.includes('.ico') ? 'image/x-icon' : 'image/png';
+    await write(STORES.assets, { key: `icon:${project.id}`, bytes, type, source: 'website-auto-v3', remoteURL, updatedAt: Date.now() });
+    return true;
+  } catch { return false; }
+}
+
+export async function refreshWebsiteIcon(project) {
+  if (project.type !== 'website') return project;
+  await remove(STORES.assets, `icon:${project.id}`);
+  const remoteIconUrl = await discoverWebsiteIcon(project.externalUrl).catch(() => null);
+  const updated = { ...project, remoteIconUrl, updatedAt: Date.now() };
+  await saveProject(updated);
+  await cacheWebsiteIcon(updated, remoteIconUrl);
+  return updated;
 }
 
 export async function listProjects() { return (await readAll(STORES.projects)).map(normalizeProject).sort((a, b) => (a.homeOrder || a.importedAt || a.createdAt || 0) - (b.homeOrder || b.importedAt || b.createdAt || 0)); }
@@ -47,7 +71,7 @@ export async function createWebsite({ name, url, homeOrder }) {
   const externalUrl = normalizeURL(url); const parsed = new URL(externalUrl);
   const remoteIconUrl = await discoverWebsiteIcon(externalUrl).catch(() => null);
   const project = { id: newId(), type: 'website', kind: 'web', name: name?.trim() || parsed.hostname.replace(/^www\./, ''), sourceName: externalUrl, externalUrl, remoteIconUrl, entryPath: parsed.hostname, fileCount: 0, totalBytes: 0, trust: 'external', compatibility: false, debug: false, spaFallback: false, createdAt: Date.now(), importedAt: Date.now(), homeOrder };
-  await saveProject(project); return project;
+  await saveProject(project); await cacheWebsiteIcon(project, remoteIconUrl); return project;
 }
 
 export async function saveProjectFiles(project, files) {
