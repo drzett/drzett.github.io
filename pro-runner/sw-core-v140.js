@@ -1,4 +1,4 @@
-const SHELL_VERSION = '2.0.0';
+const SHELL_VERSION = '2.0.1';
 const CACHE_NAME = `pro-runner-shell-${SHELL_VERSION}`;
 const DB_NAME = 'pro-runner-v1';
 const DB_VERSION = 1;

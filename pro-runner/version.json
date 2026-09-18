@@ -1,7 +1,7 @@
 {
-  "version": "2.0.0",
-  "build": "2026-09-18.2",
+  "version": "2.0.1",
+  "build": "2026-09-18.3",
   "channel": "stable",
   "released": "2026-09-18",
-  "summary": "Architecture refactor with canonical storage ownership, a standalone Home controller, and a static ESM runtime without historical patch imports. Existing local projects, website shortcuts, icons, settings, and layouts are migrated in place."
+  "summary": "Architecture refactor with canonical storage ownership, a standalone Home controller, website shortcut restoration, and a static ESM runtime without historical patch imports. Existing local projects, website shortcuts, icons, settings, and layouts are migrated in place."
 }

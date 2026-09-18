@@ -1,5 +1,5 @@
-const PATCH_VERSION='2.0.0';
-const PATCH_BUILD='2026-09-18.2';
+const PATCH_VERSION='2.0.1';
+const PATCH_BUILD='2026-09-18.3';
 const PATCH_CACHE=`pro-runner-patch-${PATCH_VERSION}-${PATCH_BUILD}`;
 const PATCH_ASSETS=['./index.html','./main.js','./update-ui.js','./update-ui-core.js','./external-frame.html','./zip.js','./core/storage.js','./core/projects.js','./core/home-state.js','./ui/home.js','./ui/icons.js','./ui/icon-designer.js'];
 const PATCH_PATHS=new Set(PATCH_ASSETS.filter(x=>x!=='./index.html').map(x=>new URL(x,self.registration.scope).pathname));
