@@ -9,7 +9,7 @@ const LEGACY_RUNNER = 'pro-runner-runner-app-v15';
 
 export const defaultSettings = Object.freeze({
   startView: 'workspace', iconLabels: true, wallpaper: 'graphite', wallpaperDim: 18,
-  glassStyle: 'standard', glassIntensity: 50,
+  glassStyle: 'standard', glassIntensity: 50, frameStyle: 'standard',
   clockWidget: true, calendarWidget: true, defaultCompat: true, defaultDebug: false,
 });
 

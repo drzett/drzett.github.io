@@ -5,6 +5,7 @@ import { normalizeProject, defaultHomeState } from '../pro-runner/core/storage.j
 import { websiteIconCandidates } from '../pro-runner/core/projects.js';
 import { normalizeIconConfig, renderIconSvg } from '../pro-runner/ui/icon-designer.js';
 import { resolveGlassMaterial } from '../pro-runner/core/glass.js';
+import { resolveFrameMaterial } from '../pro-runner/core/frame.js';
 
 test('normalizes legacy local and website records without losing website URLs', () => {
   assert.equal(normalizeProject({ id: 'local', kind: 'folder' }).type, 'local');
@@ -44,6 +45,17 @@ test('glass material preserves the original standard appearance and clamps opaci
   assert.equal(standard.panelAlpha, .54);
   assert.equal(standard.dockAlpha, .16);
   assert.equal(resolveGlassMaterial({ style: 'frosted', intensity: 100 }).panelAlpha, 1);
-  assert.equal(resolveGlassMaterial({ style: 'clear', intensity: -20 }).intensity, 0);
+  const clear = resolveGlassMaterial({ style: 'clear', intensity: -20 });
+  assert.equal(clear.intensity, 0);
+  assert.equal(clear.panelAlpha, 0);
+  assert.equal(clear.panelBlur, 0);
+  assert.equal(clear.panelSaturation, 100);
   assert.equal(resolveGlassMaterial({ style: 'unknown', intensity: 50 }).style, 'standard');
+});
+
+test('frame material exposes reversible shared edge treatments', () => {
+  assert.equal(resolveFrameMaterial().style, 'standard');
+  assert.match(resolveFrameMaterial({ style: 'top' }).icon, /inset 0 1px/);
+  assert.match(resolveFrameMaterial({ style: 'none' }).dock, /transparent/);
+  assert.equal(resolveFrameMaterial({ style: 'unknown' }).style, 'standard');
 });

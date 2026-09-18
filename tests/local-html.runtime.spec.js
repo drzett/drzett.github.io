@@ -112,9 +112,9 @@ test('activation cleans legacy shell caches and reports consistent runtime metad
     return { version, databaseVersion, caches: await caches.keys() };
   });
 
-  expect(state.version).toMatchObject({ version: '2.1.0-dev.1', build: '2026-09-18.6', releaseId: '2.1.0-dev.1-2026-09-18.6' });
+  expect(state.version).toMatchObject({ version: '2.1.0-beta.1', build: '2026-09-18.7', releaseId: '2.1.0-beta.1-2026-09-18.7' });
   expect(state.databaseVersion).toBe(2);
-  expect(state.caches).toContain('pro-runner-app-shell-2.1.0-dev.1-2026-09-18.6');
+  expect(state.caches).toContain('pro-runner-app-shell-2.1.0-beta.1-2026-09-18.7');
   expect(state.caches.some((name) => name.startsWith('pro-runner-patch-') || name.startsWith('pro-runner-shell-'))).toBe(false);
 });
 
@@ -135,15 +135,15 @@ test('upgrades from the previously deployed worker without losing browser data',
     expect((await request.post('/__test__/deployment?mode=current')).ok()).toBe(true);
     await page.locator('#settingsButton').click();
     await page.locator('#checkUpdateButton').click();
-    await expect(page.locator('#updateCheckStatus')).toHaveText('Version 2.1.0-dev.1 is ready to install.');
+    await expect(page.locator('#updateCheckStatus')).toHaveText('Version 2.1.0-beta.1 is ready to install.');
     const loaded = page.waitForEvent('load');
     await page.locator('#installUpdateButton').click();
     await loaded;
 
-    await expect(page.locator('#installedVersionValue')).toHaveText('2.1.0-dev.1');
+    await expect(page.locator('#installedVersionValue')).toHaveText('2.1.0-beta.1');
     await expect(page.locator('.project-card', { hasText: 'upgrade-data' })).toBeVisible();
     const cachesAfter = await page.evaluate(() => caches.keys());
-    expect(cachesAfter).toContain('pro-runner-app-shell-2.1.0-dev.1-2026-09-18.6');
+    expect(cachesAfter).toContain('pro-runner-app-shell-2.1.0-beta.1-2026-09-18.7');
     expect(cachesAfter.some((name) => name.startsWith('pro-runner-patch-') || name.startsWith('pro-runner-shell-'))).toBe(false);
   } finally {
     await request.post('/__test__/deployment?mode=current');

@@ -28,14 +28,15 @@ export function createHomeController({ home, content, grid, dock, done, load, sa
   function clearPosition(node) { node.style.removeProperty('grid-column'); node.style.removeProperty('grid-row'); }
   function normalize(state) {
     const metric = gridMetrics(); const occupied = new Map();
+    if (metric.rect.width < 1 || metric.rect.height < 1) return false;
     for (const node of gridItems()) { const key = itemKey(node); const size = itemSize(node); let value = state.positions[key]; if (!validPosition(value, size, metric.rows) || itemCells(value, size).some((cell) => occupied.has(cell))) value = firstFree(occupied, size, metric.rows); if (!value) continue; state.positions[key] = value; itemCells(value, size).forEach((cell) => occupied.set(cell, key)); position(node, value, size); }
-    return state;
+    return true;
   }
   async function render() {
     const state = await load();
     for (const node of items()) { const key = itemKey(node); const parent = isDocked(node, state) ? dock : grid; if (node.parentElement !== parent) parent.append(node); clearPosition(node); }
     slots(state).forEach((key, index) => { const node = items().find((item) => itemKey(item) === key); if (node) { dock.append(node); node.style.gridColumn = String(index + 1); node.style.gridRow = '1'; } });
-    normalize(state); await save(state); setEditing(editing);
+    if (normalize(state)) await save(state); setEditing(editing);
   }
   function markerAt(position, size, allowed) { if (!marker) { marker = document.createElement('div'); marker.className = 'pro-portal-grid-marker'; content.append(marker); } marker.classList.toggle('blocked', !allowed); marker.style.gridColumn = `${position.col} / span ${size.w}`; marker.style.gridRow = `${position.row} / span ${size.h}`; }
   function showDockMarkers(activeIndex) { if (!dockMarkers.length) { dockMarkers = Array.from({ length: 4 }, (_, index) => { const slot = document.createElement('div'); slot.className = 'pro-dock-slot-marker'; slot.style.gridColumn = String(index + 1); slot.style.gridRow = '1'; dock.append(slot); return slot; }); } dockMarkers.forEach((slot, index) => slot.classList.toggle('active', index === activeIndex)); }

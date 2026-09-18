@@ -119,8 +119,10 @@ test('glass settings control all glass surfaces and persist without changing the
   await page.locator('#settingsButton').click();
   await expect(page.locator('#glassStyleSelect')).toHaveValue('standard');
   await expect(page.locator('#glassIntensityRange')).toHaveValue('50');
+  await expect(page.locator('#frameStyleSelect')).toHaveValue('standard');
   await page.locator('#glassStyleSelect').selectOption('frosted');
   await page.locator('#glassIntensityRange').fill('100');
+  await page.locator('#frameStyleSelect').selectOption('sculpted');
   await expect(page.locator('#glassIntensityValue')).toHaveText('100%');
   await expect.poll(() => page.evaluate(async () => new Promise((resolve) => {
     const request = indexedDB.open('pro-runner-v1');
@@ -129,15 +131,62 @@ test('glass settings control all glass surfaces and persist without changing the
       const get = db.transaction('meta').objectStore('meta').get('app-settings-v2');
       get.onsuccess = () => { db.close(); resolve(get.result?.value); };
     };
-  }))).toMatchObject({ glassStyle: 'frosted', glassIntensity: 100 });
+  }))).toMatchObject({ glassStyle: 'frosted', glassIntensity: 100, frameStyle: 'sculpted' });
 
   await page.reload();
   await expect(page.locator('#homeScreen')).toBeVisible();
   expect(await page.evaluate(() => ({
     style: document.documentElement.dataset.glassStyle,
+    frame: document.documentElement.dataset.frameStyle,
     panel: getComputedStyle(document.documentElement).getPropertyValue('--glass-panel-alpha').trim(),
     dock: getComputedStyle(document.documentElement).getPropertyValue('--glass-dock-alpha').trim(),
-  }))).toEqual({ style: 'frosted', panel: '1', dock: '1' });
+  }))).toEqual({ style: 'frosted', frame: 'sculpted', panel: '1', dock: '1' });
+});
+
+test('appearance changes do not overwrite Home positions while the Home screen is hidden', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  await page.evaluate(async () => new Promise((resolve, reject) => {
+    const request = indexedDB.open('pro-runner-v1');
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction('meta', 'readwrite');
+      const store = tx.objectStore('meta');
+      const get = store.get('home-state-v3');
+      get.onsuccess = () => {
+        const record = get.result;
+        record.value.positions['widget:clock'] = { col: 1, row: 3 };
+        store.put(record);
+      };
+      tx.oncomplete = () => { db.close(); resolve(); };
+      tx.onerror = () => reject(tx.error);
+    };
+  }));
+  await page.reload();
+  await expect(page.locator('.clock-widget')).toHaveCSS('grid-row-start', '3');
+
+  await page.locator('.home-app[data-runner="true"]').click();
+  await page.locator('#settingsButton').click();
+  await page.locator('#glassStyleSelect').selectOption('clear');
+  await page.locator('#glassIntensityRange').fill('0');
+  await page.locator('#frameStyleSelect').selectOption('top');
+  await page.locator('#settingsDialog .close-button').click();
+  await page.locator('#homeViewButton').click();
+
+  await expect(page.locator('.clock-widget')).toHaveCSS('grid-row-start', '3');
+  const storedPosition = await page.evaluate(async () => new Promise((resolve) => {
+    const request = indexedDB.open('pro-runner-v1');
+    request.onsuccess = () => {
+      const db = request.result;
+      const get = db.transaction('meta').objectStore('meta').get('home-state-v3');
+      get.onsuccess = () => { db.close(); resolve(get.result.value.positions['widget:clock']); };
+    };
+  }));
+  expect(storedPosition).toEqual({ col: 1, row: 3 });
+  expect(await page.evaluate(() => ({
+    alpha: getComputedStyle(document.documentElement).getPropertyValue('--glass-panel-alpha').trim(),
+    blur: getComputedStyle(document.documentElement).getPropertyValue('--glass-panel-blur').trim(),
+  }))).toEqual({ alpha: '0', blur: '0px' });
 });
 
 test('the calendar widget renders its current month grid', async ({ page }) => {

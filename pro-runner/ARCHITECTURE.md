@@ -13,6 +13,15 @@ the page and the service worker. `version.json` is the network update manifest
 required by static GitHub Pages hosting; `tests/release.test.js` prevents its
 version, build, channel, or release date from drifting from `release.js`.
 
+Home appearance is data-driven rather than duplicated across individual
+components. `core/glass.js` owns the shared glass variants and intensity curve;
+0% removes tint and area blur, 50% preserves the original material, and 100%
+is opaque. `core/frame.js` owns reversible edge treatments shared by Home
+icons, widgets, and the Dock. Both settings are stored in the existing settings
+record and both modules are part of the offline application shell. Layout is
+never normalized while the Home surface is hidden, because hidden geometry is
+not a valid basis for persisted positions.
+
 ## Storage and virtual hosting
 
 IndexedDB `pro-runner-v1` version 2 owns four stores:

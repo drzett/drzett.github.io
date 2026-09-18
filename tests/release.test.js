@@ -18,5 +18,6 @@ test('release metadata, service worker, and database schema stay consistent', as
   assert.match(entry, /importScripts\('\.\/release\.js', '\.\/sw-runtime\.js'\)/);
   assert.doesNotMatch(entry, /sw-core-v\d+/);
   assert.match(worker, /'\.\/core\/glass\.js'/);
+  assert.match(worker, /'\.\/core\/frame\.js'/);
   assert.equal(Number(storage.match(/DB_VERSION = (\d+)/)?.[1]), Number(worker.match(/DB_VERSION = (\d+)/)?.[1]));
 });

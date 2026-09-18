@@ -7,7 +7,7 @@
     "test:chromium": "playwright test --project=chromium --workers=1",
     "test:webkit": "playwright test --project=webkit --workers=1",
     "test:runtime": "playwright test --project=runtime-chromium --workers=1",
-    "check": "node --check pro-runner/main.js && node --check pro-runner/sw.js && node --check pro-runner/sw-runtime.js && node --check pro-runner/release.js && node --check pro-runner/update-ui.js && node --check pro-runner/update-ui-core.js && node --check pro-runner/core/storage.js && node --check pro-runner/core/projects.js && node --check pro-runner/core/glass.js && node --check pro-runner/ui/home.js && node --check pro-runner/ui/icon-designer.js"
+    "check": "node --check pro-runner/main.js && node --check pro-runner/sw.js && node --check pro-runner/sw-runtime.js && node --check pro-runner/release.js && node --check pro-runner/update-ui.js && node --check pro-runner/update-ui-core.js && node --check pro-runner/core/storage.js && node --check pro-runner/core/projects.js && node --check pro-runner/core/glass.js && node --check pro-runner/core/frame.js && node --check pro-runner/ui/home.js && node --check pro-runner/ui/icon-designer.js"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0"

@@ -2,20 +2,20 @@ export const glassDefaults = Object.freeze({ style: 'standard', intensity: 50 })
 
 export const glassStyles = Object.freeze({
   standard: Object.freeze({
-    panel: Object.freeze({ lowAlpha: .06, defaultAlpha: .54, blur: 28, saturation: 165 }),
-    dock: Object.freeze({ lowAlpha: .035, defaultAlpha: .16, blur: 34, saturation: 180 }),
+    panel: Object.freeze({ lowAlpha: 0, defaultAlpha: .54, blur: 28, saturation: 165 }),
+    dock: Object.freeze({ lowAlpha: 0, defaultAlpha: .16, blur: 34, saturation: 180 }),
     brightness: 1,
     highlight: 0,
   }),
   clear: Object.freeze({
-    panel: Object.freeze({ lowAlpha: .025, defaultAlpha: .34, blur: 16, saturation: 195 }),
-    dock: Object.freeze({ lowAlpha: .02, defaultAlpha: .10, blur: 20, saturation: 210 }),
+    panel: Object.freeze({ lowAlpha: 0, defaultAlpha: .34, blur: 16, saturation: 195 }),
+    dock: Object.freeze({ lowAlpha: 0, defaultAlpha: .10, blur: 20, saturation: 210 }),
     brightness: 1.06,
     highlight: .09,
   }),
   frosted: Object.freeze({
-    panel: Object.freeze({ lowAlpha: .08, defaultAlpha: .68, blur: 42, saturation: 135 }),
-    dock: Object.freeze({ lowAlpha: .05, defaultAlpha: .28, blur: 48, saturation: 145 }),
+    panel: Object.freeze({ lowAlpha: 0, defaultAlpha: .68, blur: 42, saturation: 135 }),
+    dock: Object.freeze({ lowAlpha: 0, defaultAlpha: .28, blur: 48, saturation: 145 }),
     brightness: 1.08,
     highlight: .18,
   }),
@@ -29,21 +29,32 @@ function opacityAt(surface, intensity) {
   return mix(surface.defaultAlpha, 1, (intensity - 50) / 50);
 }
 
+function filterAt(surface, intensity) {
+  if (intensity <= 50) {
+    const amount = intensity / 50;
+    return { blur: mix(0, surface.blur, amount), saturation: mix(100, surface.saturation, amount) };
+  }
+  const amount = (intensity - 50) / 50;
+  return { blur: mix(surface.blur, surface.blur * 1.2, amount), saturation: mix(surface.saturation, Math.max(100, surface.saturation * .9), amount) };
+}
+
 export function resolveGlassMaterial(value = {}) {
   const style = Object.hasOwn(glassStyles, value.style) ? value.style : glassDefaults.style;
   const intensity = clamp(Number.isFinite(Number(value.intensity)) ? Number(value.intensity) : glassDefaults.intensity, 0, 100);
   const preset = glassStyles[style];
+  const panelFilter = filterAt(preset.panel, intensity);
+  const dockFilter = filterAt(preset.dock, intensity);
   return {
     style,
     intensity,
     panelAlpha: opacityAt(preset.panel, intensity),
     dockAlpha: opacityAt(preset.dock, intensity),
-    panelBlur: preset.panel.blur,
-    dockBlur: preset.dock.blur,
-    panelSaturation: preset.panel.saturation,
-    dockSaturation: preset.dock.saturation,
-    brightness: preset.brightness,
-    highlight: intensity === 100 ? 0 : preset.highlight,
+    panelBlur: panelFilter.blur,
+    dockBlur: dockFilter.blur,
+    panelSaturation: panelFilter.saturation,
+    dockSaturation: dockFilter.saturation,
+    brightness: mix(1, preset.brightness, Math.min(1, intensity / 50)),
+    highlight: preset.highlight * Math.sin(Math.PI * intensity / 100),
   };
 }
 
