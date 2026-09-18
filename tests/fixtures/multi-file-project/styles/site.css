@@ -1,0 +1,2 @@
+body { color: rgb(18, 52, 86); }
+#css-asset { width: 20px; height: 20px; background: url('../assets/background.svg') center / contain; }

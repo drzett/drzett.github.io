@@ -8,3 +8,4 @@ playwright/.cache/
 !.env.example
 .DS_Store
 npm-debug.log*
+/.codex/

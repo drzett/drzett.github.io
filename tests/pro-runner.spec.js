@@ -47,6 +47,8 @@ test('website entries open in the external viewer without changing their type or
   await page.locator('.home-app[data-id="web-1"]').click();
   await expect(page.locator('#viewer')).toBeVisible();
   await expect(page.locator('#projectFrame')).toHaveAttribute('src', 'https://example.test/app');
+  await expect(page.locator('#viewerExternalFallback')).toBeVisible();
+  await expect(page.locator('#viewerExternalOpen')).toBeVisible();
   const project = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('projects').objectStore('projects').get('web-1'); get.onsuccess = () => resolve(get.result); }; }));
   expect(project.type).toBe('website'); expect(project.externalUrl).toBe('https://example.test/app');
 });
@@ -76,6 +78,29 @@ test('an icon can occupy an explicitly chosen empty dock slot', async ({ page })
   await expect(page.locator('#homeDock .home-app[data-id="web-1"]')).toHaveCSS('grid-column-start', '3');
   const home = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('meta').objectStore('meta').get('home-state-v3'); get.onsuccess = () => resolve(get.result.value); }; }));
   expect(home.dockSlots[2]).toBe('project:web-1');
+});
+
+test('dragging an icon keeps a live icon ghost and shows four dock targets', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  const item = page.locator('#homeAppGrid .home-app[data-id="web-1"]');
+  await expect(item).toBeVisible();
+  let box = await item.boundingBox();
+  await item.dispatchEvent('pointerdown', { pointerId: 18, clientX: box.x + 20, clientY: box.y + 20, button: 0 });
+  await page.waitForTimeout(650);
+  await item.dispatchEvent('pointerup', { pointerId: 18, clientX: box.x + 20, clientY: box.y + 20, button: 0 });
+  await page.waitForTimeout(100);
+
+  box = await item.boundingBox();
+  const dock = await page.locator('#homeDock').boundingBox();
+  await item.dispatchEvent('pointerdown', { pointerId: 19, clientX: box.x + 20, clientY: box.y + 20, button: 0 });
+  await item.dispatchEvent('pointermove', { pointerId: 19, clientX: dock.x + dock.width * .75, clientY: dock.y + dock.height / 2, buttons: 1 });
+
+  await expect(page.locator('#homeDock .pro-dock-slot-marker')).toHaveCount(4);
+  await expect(page.locator('#homeDock .pro-dock-slot-marker.active')).toHaveCount(1);
+  await expect(page.locator('.pro-drag-ghost')).toBeVisible();
+  await expect(page.locator('.pro-drag-ghost > .home-app-icon')).toHaveCSS('animation-name', 'springboard-icon-jiggle');
+  await item.dispatchEvent('pointercancel', { pointerId: 19, clientX: dock.x + dock.width * .75, clientY: dock.y + dock.height / 2 });
+  await expect(page.locator('.pro-drag-ghost')).toHaveCount(0);
 });
 
 test('the calendar widget renders its current month grid', async ({ page }) => {
@@ -109,7 +134,7 @@ test('the Pro Runner return icon has its own Home edit configuration', async ({ 
 test('delete badges stay hidden until Home edit mode starts', async ({ page }) => {
   await seedLegacy(page); await page.goto('./');
   await expect(page.locator('.home-app[data-id="local-1"] .app-delete-badge')).toBeHidden();
-  const item = page.locator('.home-app[data-id="local-1"]'); const box = await item.boundingBox();
+  const item = page.locator('.home-app[data-id="local-1"]'); await expect(item).toBeVisible(); const box = await item.boundingBox();
   await item.dispatchEvent('pointerdown', { pointerId: 11, clientX: box.x + 20, clientY: box.y + 20, button: 0 }); await page.waitForTimeout(650);
   await expect(page.locator('.home-app[data-id="local-1"] .app-delete-badge')).toBeVisible();
 });

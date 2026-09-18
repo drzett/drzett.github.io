@@ -224,12 +224,15 @@
 
 .pro-drag-ghost { position: fixed; z-index: 10000; left: 0; top: 0; pointer-events: none; filter: drop-shadow(0 16px 28px rgba(0,0,0,.34)); will-change: transform; }
 .pro-drag-ghost .app-delete-badge { display: none !important; }
-.pro-drag-ghost > .home-app-icon { width:100%!important; height:100%!important; max-width:none!important; max-height:none!important; margin:0!important; animation:none!important; transform:none!important; }
+.pro-drag-ghost > .home-app-icon { width:100%!important; height:100%!important; max-width:none!important; max-height:none!important; margin:0!important; opacity:1!important; animation:springboard-icon-jiggle var(--jiggle-duration,.14s) var(--jiggle-delay,0s) ease-in-out infinite alternate!important; transform-origin:50% 54%; }
 .portal-drag-source > .home-app-icon { opacity: .2; }
 .springboard-editing .home-content { overflow:visible; contain:layout; }
 .pro-portal-grid-marker { pointer-events: none; z-index: 1; border-radius: 24%; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.34); }
 .pro-portal-grid-marker.blocked { background: rgba(255,95,95,.08); box-shadow: inset 0 0 0 1.5px rgba(255,120,120,.45); }
 .home-dock-drop { box-shadow: inset 0 0 0 2px rgba(255,255,255,.46), 0 8px 26px rgba(0,0,0,.16); }
+.pro-dock-slot-marker { align-self:stretch; justify-self:stretch; min-width:0; min-height:0; margin:2px 0; border-radius:24%; background:rgba(255,255,255,.055); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22); pointer-events:none; z-index:0; }
+.pro-dock-slot-marker.active { background:rgba(255,255,255,.12); box-shadow:inset 0 0 0 2px rgba(255,255,255,.58); }
+.home-dock .home-app { position:relative; z-index:1; }
 .calendar-widget { background: linear-gradient(155deg, rgba(27,27,30,.94), rgba(11,12,15,.96)); }
 .calendar-head { align-items: start !important; }
 .calendar-head strong { color: #ff453a; font-weight: 760; letter-spacing: -.02em; }
