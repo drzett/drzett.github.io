@@ -224,7 +224,7 @@
 
 .pro-drag-ghost { position: fixed; z-index: 10000; left: 0; top: 0; pointer-events: none; filter: drop-shadow(0 16px 28px rgba(0,0,0,.34)); will-change: transform; }
 .pro-drag-ghost .app-delete-badge { display: none !important; }
-.pro-drag-ghost > .home-app-icon { width:100%!important; height:100%!important; max-width:none!important; max-height:none!important; margin:0!important; opacity:1!important; animation:springboard-icon-jiggle var(--jiggle-duration,.14s) var(--jiggle-delay,0s) ease-in-out infinite alternate!important; transform-origin:50% 54%; }
+.pro-drag-ghost > .home-app-icon { width:100%!important; height:100%!important; max-width:none!important; max-height:none!important; margin:0!important; border-radius:var(--spring-icon-radius,25.9%)!important; overflow:hidden; opacity:1!important; animation:springboard-icon-jiggle var(--jiggle-duration,.14s) var(--jiggle-delay,0s) ease-in-out infinite alternate!important; transform-origin:50% 54%; }
 .portal-drag-source > .home-app-icon { opacity: .2; }
 .springboard-editing .home-content { overflow:visible; contain:layout; }
 .pro-portal-grid-marker { pointer-events: none; z-index: 1; border-radius: 24%; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.34); }

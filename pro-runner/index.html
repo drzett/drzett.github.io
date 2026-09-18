@@ -39,7 +39,7 @@
         <section id="homeAppGrid" class="app-grid" aria-label="Applications"></section>
       </div>
       <div class="page-dots" aria-hidden="true"><span class="active"></span></div>
-      <section id="homeDock" class="home-dock" aria-label="Dock"></section>
+      <section id="homeDock" class="home-dock glass-surface glass-surface-dock" aria-label="Dock"></section>
     </section>
 
     <section id="workspace" class="workspace">
@@ -104,7 +104,6 @@
 
     <section id="viewer" class="viewer-shell hidden" aria-label="Project viewer">
       <iframe id="projectFrame" title="Local project"></iframe>
-      <div id="viewerExternalFallback" class="viewer-external-fallback hidden"><span>This website may block embedded viewing.</span><button id="viewerExternalOpen" type="button">Open in browser</button></div>
       <button id="viewerControl" class="viewer-control" type="button" aria-label="Runner controls">•••</button>
       <div id="viewerMenu" class="viewer-menu hidden">
         <div class="viewer-menu-title"><strong id="viewerProjectName">Project</strong><small id="viewerProjectPath">index.html</small></div>
@@ -163,6 +162,9 @@
           <div id="wallpaperPresets" class="wallpaper-presets"></div>
           <button id="customWallpaperButton" class="subtle-button full" type="button">Choose wallpaper image</button>
           <label class="range-row"><span>Wallpaper dimming</span><input id="wallpaperDimRange" type="range" min="0" max="70" step="1"></label>
+          <label class="field"><span>Glass style</span><select id="glassStyleSelect"><option value="standard">Standard</option><option value="clear">Clear</option><option value="frosted">Frosted</option></select></label>
+          <label class="range-row"><span>Glass intensity <output id="glassIntensityValue">50%</output></span><input id="glassIntensityRange" type="range" min="0" max="100" step="1" value="50"></label>
+          <p class="setting-hint">Controls every glass surface. Standard at 50% preserves the original appearance.</p>
           <label class="toggle-row"><span><strong>Clock widget</strong><small>Live local time widget.</small></span><input id="clockWidgetToggle" type="checkbox" role="switch"></label>
           <label class="toggle-row"><span><strong>Calendar widget</strong><small>Current date and month overview.</small></span><input id="calendarWidgetToggle" type="checkbox" role="switch"></label>
         </section>

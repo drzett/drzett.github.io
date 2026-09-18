@@ -1,7 +1,7 @@
 {
-  "version": "2.0.2",
-  "build": "2026-09-18.5",
-  "channel": "stable",
+  "version": "2.1.0-dev.1",
+  "build": "2026-09-18.6",
+  "channel": "development",
   "released": "2026-09-18",
-  "summary": "Consolidated service-worker runtime and release metadata with offline-safe local execution, verified in-place upgrades, improved Home drag feedback, and an explicit external-browser fallback. Existing projects, icons, settings, and layouts are preserved."
+  "summary": "Local development build with shared glass materials, persistent appearance controls, rounded live icon dragging, and an unobtrusive external-browser fallback in the viewer menu."
 }

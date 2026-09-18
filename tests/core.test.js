@@ -4,6 +4,7 @@ import { firstFree, itemCells, moveDockItem, validPosition } from '../pro-runner
 import { normalizeProject, defaultHomeState } from '../pro-runner/core/storage.js';
 import { websiteIconCandidates } from '../pro-runner/core/projects.js';
 import { normalizeIconConfig, renderIconSvg } from '../pro-runner/ui/icon-designer.js';
+import { resolveGlassMaterial } from '../pro-runner/core/glass.js';
 
 test('normalizes legacy local and website records without losing website URLs', () => {
   assert.equal(normalizeProject({ id: 'local', kind: 'folder' }).type, 'local');
@@ -34,4 +35,15 @@ test('website icon discovery includes high-resolution and favicon fallbacks', ()
   assert.equal(candidates[0], 'https://example.test/apple-touch-icon.png');
   assert.ok(candidates.includes('https://example.test/android-chrome-512x512.png'));
   assert.ok(candidates.includes('https://example.test/favicon.ico'));
+});
+
+test('glass material preserves the original standard appearance and clamps opacity controls', () => {
+  const standard = resolveGlassMaterial();
+  assert.equal(standard.style, 'standard');
+  assert.equal(standard.intensity, 50);
+  assert.equal(standard.panelAlpha, .54);
+  assert.equal(standard.dockAlpha, .16);
+  assert.equal(resolveGlassMaterial({ style: 'frosted', intensity: 100 }).panelAlpha, 1);
+  assert.equal(resolveGlassMaterial({ style: 'clear', intensity: -20 }).intensity, 0);
+  assert.equal(resolveGlassMaterial({ style: 'unknown', intensity: 50 }).style, 'standard');
 });

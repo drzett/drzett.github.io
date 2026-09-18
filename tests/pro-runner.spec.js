@@ -47,8 +47,9 @@ test('website entries open in the external viewer without changing their type or
   await page.locator('.home-app[data-id="web-1"]').click();
   await expect(page.locator('#viewer')).toBeVisible();
   await expect(page.locator('#projectFrame')).toHaveAttribute('src', 'https://example.test/app');
-  await expect(page.locator('#viewerExternalFallback')).toBeVisible();
-  await expect(page.locator('#viewerExternalOpen')).toBeVisible();
+  await expect(page.locator('#viewerExternalFallback')).toHaveCount(0);
+  await page.locator('#viewerControl').click();
+  await expect(page.locator('#viewerBrowser')).toBeVisible();
   const project = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('projects').objectStore('projects').get('web-1'); get.onsuccess = () => resolve(get.result); }; }));
   expect(project.type).toBe('website'); expect(project.externalUrl).toBe('https://example.test/app');
 });
@@ -99,8 +100,44 @@ test('dragging an icon keeps a live icon ghost and shows four dock targets', asy
   await expect(page.locator('#homeDock .pro-dock-slot-marker.active')).toHaveCount(1);
   await expect(page.locator('.pro-drag-ghost')).toBeVisible();
   await expect(page.locator('.pro-drag-ghost > .home-app-icon')).toHaveCSS('animation-name', 'springboard-icon-jiggle');
+  expect(await page.locator('.pro-drag-ghost > .home-app-icon').evaluate((node) => parseFloat(getComputedStyle(node).borderTopLeftRadius))).toBeGreaterThan(0);
   await item.dispatchEvent('pointercancel', { pointerId: 19, clientX: dock.x + dock.width * .75, clientY: dock.y + dock.height / 2 });
   await expect(page.locator('.pro-drag-ghost')).toHaveCount(0);
+});
+
+test('glass settings control all glass surfaces and persist without changing the calendar material', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  await expect(page.locator('.clock-widget')).toHaveClass(/glass-surface-panel/);
+  await expect(page.locator('#homeDock')).toHaveClass(/glass-surface-dock/);
+  await expect(page.locator('.calendar-widget')).not.toHaveClass(/glass-surface/);
+  expect(await page.evaluate(() => ({
+    panel: getComputedStyle(document.documentElement).getPropertyValue('--glass-panel-alpha').trim(),
+    dock: getComputedStyle(document.documentElement).getPropertyValue('--glass-dock-alpha').trim(),
+  }))).toEqual({ panel: '0.54', dock: '0.16' });
+
+  await page.locator('.home-app[data-runner="true"]').click();
+  await page.locator('#settingsButton').click();
+  await expect(page.locator('#glassStyleSelect')).toHaveValue('standard');
+  await expect(page.locator('#glassIntensityRange')).toHaveValue('50');
+  await page.locator('#glassStyleSelect').selectOption('frosted');
+  await page.locator('#glassIntensityRange').fill('100');
+  await expect(page.locator('#glassIntensityValue')).toHaveText('100%');
+  await expect.poll(() => page.evaluate(async () => new Promise((resolve) => {
+    const request = indexedDB.open('pro-runner-v1');
+    request.onsuccess = () => {
+      const db = request.result;
+      const get = db.transaction('meta').objectStore('meta').get('app-settings-v2');
+      get.onsuccess = () => { db.close(); resolve(get.result?.value); };
+    };
+  }))).toMatchObject({ glassStyle: 'frosted', glassIntensity: 100 });
+
+  await page.reload();
+  await expect(page.locator('#homeScreen')).toBeVisible();
+  expect(await page.evaluate(() => ({
+    style: document.documentElement.dataset.glassStyle,
+    panel: getComputedStyle(document.documentElement).getPropertyValue('--glass-panel-alpha').trim(),
+    dock: getComputedStyle(document.documentElement).getPropertyValue('--glass-dock-alpha').trim(),
+  }))).toEqual({ style: 'frosted', panel: '1', dock: '1' });
 });
 
 test('the calendar widget renders its current month grid', async ({ page }) => {
