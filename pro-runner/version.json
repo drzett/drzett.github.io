@@ -1,7 +1,7 @@
 {
-  "version": "2.1.0-beta.1",
-  "build": "2026-09-18.7",
+  "version": "2.1.0-beta.2",
+  "build": "2026-09-18.8",
   "channel": "beta",
   "released": "2026-09-18",
-  "summary": "Beta release with clear-to-opaque glass materials, shared frame styles, layout-safe appearance changes, rounded live icon dragging, and an unobtrusive external-browser fallback."
+  "summary": "Hotfix beta with broader website icon fallbacks, uniform iPhone long-press behavior, per-site browser launch mode, and an additional dual-highlight surface frame."
 }

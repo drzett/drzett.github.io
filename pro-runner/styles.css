@@ -116,7 +116,8 @@ button, [role="button"] { -webkit-tap-highlight-color: transparent; }
 .full { width: 100%; }
 
 html:has(.home-screen:not(.hidden)), body:has(.home-screen:not(.hidden)) { width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; background: #090a0c; }
-.home-screen { position: fixed; inset: 0; width: 100vw; min-height: 100vh; min-height: 100dvh; z-index: 100; overflow: hidden; overscroll-behavior: none; isolation: isolate; background: #090a0c; color: white; user-select: none; -webkit-user-select: none; }
+.home-screen { position: fixed; inset: 0; width: 100vw; min-height: 100vh; min-height: 100dvh; z-index: 100; overflow: hidden; overscroll-behavior: none; isolation: isolate; background: #090a0c; color: white; user-select: none; -webkit-user-select: none; -webkit-touch-callout:none; }
+.home-screen img,.home-screen [data-home-item="true"] { -webkit-touch-callout:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; }
 .wallpaper { position: absolute; z-index: 0; top: calc(-1 * var(--wallpaper-overscan-y)); bottom: calc(-1 * var(--wallpaper-overscan-y)); left: calc(-1 * var(--wallpaper-overscan-x)); right: calc(-1 * var(--wallpaper-overscan-x)); background: radial-gradient(circle at 25% 20%, #6a7084 0, #30343d 29%, #111318 69%, #090a0c 100%); background-size: cover; background-position: 50% 50%; background-repeat: no-repeat; transform: translateZ(0); transform-origin: center center; will-change: transform; pointer-events: none; }
 .home-scrim { position: absolute; inset: 0; background: rgba(0,0,0,var(--wallpaper-dim)); pointer-events: none; }
 .phone-status { display: none; }

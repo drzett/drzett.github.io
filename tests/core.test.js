@@ -35,7 +35,9 @@ test('website icon discovery includes high-resolution and favicon fallbacks', ()
   const candidates = websiteIconCandidates('https://example.test/path');
   assert.equal(candidates[0], 'https://example.test/apple-touch-icon.png');
   assert.ok(candidates.includes('https://example.test/android-chrome-512x512.png'));
+  assert.ok(candidates.includes('https://example.test/favicon-16x16.png'));
   assert.ok(candidates.includes('https://example.test/favicon.ico'));
+  assert.ok(candidates.some((url) => url.startsWith('https://www.google.com/s2/favicons?')));
 });
 
 test('glass material preserves the original standard appearance and clamps opacity controls', () => {
@@ -57,5 +59,6 @@ test('frame material exposes reversible shared edge treatments', () => {
   assert.equal(resolveFrameMaterial().style, 'standard');
   assert.match(resolveFrameMaterial({ style: 'top' }).icon, /inset 0 1px/);
   assert.match(resolveFrameMaterial({ style: 'none' }).dock, /transparent/);
+  assert.match(resolveFrameMaterial({ style: 'dual' }).dock, /255,255,255.*255,255,255/);
   assert.equal(resolveFrameMaterial({ style: 'unknown' }).style, 'standard');
 });

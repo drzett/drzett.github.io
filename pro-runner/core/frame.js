@@ -5,6 +5,7 @@ export const frameStyles = Object.freeze({
   none: Object.freeze({ icon: 'inset 0 0 0 0 transparent', widget: 'inset 0 0 0 0 transparent', dock: 'inset 0 0 0 0 transparent' }),
   top: Object.freeze({ icon: 'inset 0 1px 0 rgba(255,255,255,.42)', widget: 'inset 0 1px 0 rgba(255,255,255,.36)', dock: 'inset 0 1px 0 rgba(255,255,255,.38)' }),
   sculpted: Object.freeze({ icon: 'inset 0 1px 0 rgba(255,255,255,.38), inset 0 -1px 0 rgba(0,0,0,.28)', widget: 'inset 0 1px 0 rgba(255,255,255,.32), inset 0 -1px 0 rgba(0,0,0,.3)', dock: 'inset 0 1px 0 rgba(255,255,255,.34), inset 0 -1px 0 rgba(0,0,0,.25)' }),
+  dual: Object.freeze({ icon: 'inset 0 1px 0 rgba(255,255,255,.34), inset 0 -1px 0 rgba(255,255,255,.3)', widget: 'inset 0 1px 0 rgba(255,255,255,.29), inset 0 -1px 0 rgba(255,255,255,.25)', dock: 'inset 0 1px 0 rgba(255,255,255,.31), inset 0 -1px 0 rgba(255,255,255,.27)' }),
 });
 
 export function resolveFrameMaterial(value = {}) {

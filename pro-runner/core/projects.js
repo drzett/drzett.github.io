@@ -15,7 +15,10 @@ export function normalizeURL(raw) {
 
 export function websiteIconCandidates(pageURL) {
   const url = new URL(pageURL);
-  return ['/apple-touch-icon.png', '/apple-touch-icon-precomposed.png', '/android-chrome-512x512.png', '/android-chrome-192x192.png', '/logo-512x512.png', '/logo-256x256.png', '/logo-180x180.png', '/icon-512.png', '/icon-192.png', '/icons/icon-512.png', '/icons/icon-192.png', '/favicon-512x512.png', '/favicon-256x256.png', '/favicon-192x192.png', '/favicon-96x96.png', '/favicon-64x64.png', '/favicon-48x48.png', '/favicon-32x32.png', '/favicon.svg', '/favicon.png', '/favicon.ico'].map((path) => new URL(path, url.origin).href);
+  const direct = ['/apple-touch-icon.png', '/apple-touch-icon-precomposed.png', '/apple-touch-icon-180x180.png', '/apple-touch-icon-152x152.png', '/android-chrome-512x512.png', '/android-chrome-256x256.png', '/android-chrome-192x192.png', '/logo-512x512.png', '/logo-256x256.png', '/logo-180x180.png', '/icon-512.png', '/icon-256.png', '/icon-192.png', '/icon-180.png', '/icons/icon-512.png', '/icons/icon-256.png', '/icons/icon-192.png', '/favicon-512x512.png', '/favicon-256x256.png', '/favicon-192x192.png', '/favicon-128x128.png', '/favicon-96x96.png', '/favicon-64x64.png', '/favicon-48x48.png', '/favicon-32x32.png', '/favicon-16x16.png', '/favicon.svg', '/favicon.png', '/favicon.ico'].map((path) => new URL(path, url.origin).href);
+  const domain = encodeURIComponent(url.hostname);
+  const page = encodeURIComponent(url.href);
+  return [...direct, `https://www.google.com/s2/favicons?domain_url=${page}&sz=256`, `https://www.google.com/s2/favicons?domain=${domain}&sz=128`, `https://icons.duckduckgo.com/ip3/${domain}.ico`];
 }
 
 function probeImage(url, timeout = 1800) {
