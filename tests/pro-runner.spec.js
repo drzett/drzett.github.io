@@ -65,6 +65,41 @@ test('website library shows launch mode and honest scan status', async ({ page }
   await expect(page.locator('.project-card[data-id="web-1"] .website-library-meta')).toContainText('Embedding not verifiable');
 });
 
+test('website browser actions request a popup from Home, Library, and Viewer', async ({ page }) => {
+  await seedLegacy(page);
+  await page.evaluate(async () => new Promise((resolve, reject) => {
+    const request = indexedDB.open('pro-runner-v1');
+    request.onsuccess = () => {
+      const db = request.result; const tx = db.transaction('projects', 'readwrite');
+      const store = tx.objectStore('projects'); const get = store.get('web-1');
+      get.onsuccess = () => store.put({ ...get.result, websiteLaunchMode: 'browser' });
+      tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => reject(tx.error);
+    };
+    request.onerror = () => reject(request.error);
+  }));
+  await page.addInitScript(() => {
+    window.__browserOpens = [];
+    window.open = (url, target, features) => {
+      window.__browserOpens.push({ url, target, features });
+      return { opener: window };
+    };
+  });
+  await page.goto('./');
+  await page.locator('.home-app[data-id="web-1"]').click();
+  await page.locator('.home-app[data-runner="true"]').click();
+  const card = page.locator('.project-card[data-id="web-1"]');
+  await card.getByRole('button', { name: 'Open in browser' }).click();
+  await card.getByRole('button', { name: 'Settings' }).click();
+  await page.locator('#websiteLaunchMode').selectOption('embedded');
+  await page.locator('#saveProjectButton').click();
+  await card.getByRole('button', { name: 'Open', exact: true }).click();
+  await page.locator('#viewerControl').click();
+  await page.locator('#viewerBrowser').click();
+  expect(await page.evaluate(() => window.__browserOpens)).toEqual(Array(3).fill({
+    url: 'https://example.test/app', target: '_blank', features: 'popup',
+  }));
+});
+
 test('a readable blocking policy selects browser mode when adding a website', async ({ page }) => {
   await page.route('https://blocked.test/**', (route) => {
     if (route.request().method() === 'HEAD') return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'content-security-policy', 'content-security-policy': "frame-ancestors 'none'" } });

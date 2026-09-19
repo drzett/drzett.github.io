@@ -1,7 +1,7 @@
 {
-  "version": "2.1.0-beta.3",
-  "build": "2026-09-19.1",
+  "version": "2.1.0-beta.4",
+  "build": "2026-09-19.2",
   "channel": "beta",
   "released": "2026-09-19",
-  "summary": "Viewer controls now start closed. Website shortcuts show launch mode and a best-effort embed-policy scan; definitively blocked sites default to browser launch."
+  "summary": "Experimental popup opening for website shortcuts, with a direct Browser action in the project library."
 }
