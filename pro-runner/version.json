@@ -1,7 +1,7 @@
 {
-  "version": "2.1.0-beta.2",
-  "build": "2026-09-18.8",
+  "version": "2.1.0-beta.3",
+  "build": "2026-09-19.1",
   "channel": "beta",
-  "released": "2026-09-18",
-  "summary": "Hotfix beta with broader website icon fallbacks, uniform iPhone long-press behavior, per-site browser launch mode, and an additional dual-highlight surface frame."
+  "released": "2026-09-19",
+  "summary": "Viewer controls now start closed. Website shortcuts show launch mode and a best-effort embed-policy scan; definitively blocked sites default to browser launch."
 }

@@ -50,6 +50,13 @@ messages, and fetch routing:
   visible `503` instead of stale update information.
 - Cross-origin and unrelated same-origin requests are left to the browser.
 
+Website shortcuts perform a bounded best-effort `HEAD` policy scan at import
+and when their URL changes. `core/website-scan.js` only marks an embed as
+blocked when readable CSP `frame-ancestors` or `X-Frame-Options` headers prove
+it; most cross-origin responses conceal these headers through CORS, so the
+honest result is `unknown`. The user can override the launch mode. The scan
+does not proxy, rewrite, or bypass a third party's embedding policy.
+
 On activation, the worker deletes only current/legacy Pro Runner application
 cache families (`pro-runner-app-shell-*`, `pro-runner-shell-*`, and
 `pro-runner-patch-*`). This provides the transition from the currently

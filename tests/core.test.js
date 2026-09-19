@@ -6,6 +6,7 @@ import { websiteIconCandidates } from '../pro-runner/core/projects.js';
 import { normalizeIconConfig, renderIconSvg } from '../pro-runner/ui/icon-designer.js';
 import { resolveGlassMaterial } from '../pro-runner/core/glass.js';
 import { resolveFrameMaterial } from '../pro-runner/core/frame.js';
+import { assessEmbedding } from '../pro-runner/core/website-scan.js';
 
 test('normalizes legacy local and website records without losing website URLs', () => {
   assert.equal(normalizeProject({ id: 'local', kind: 'folder' }).type, 'local');
@@ -61,4 +62,13 @@ test('frame material exposes reversible shared edge treatments', () => {
   assert.match(resolveFrameMaterial({ style: 'none' }).dock, /transparent/);
   assert.match(resolveFrameMaterial({ style: 'dual' }).dock, /255,255,255.*255,255,255/);
   assert.equal(resolveFrameMaterial({ style: 'unknown' }).style, 'standard');
+});
+
+test('website scan only calls embedding blocked when readable policies prove it', () => {
+  const target = 'https://example.test/app';
+  const ours = 'https://drzett.github.io';
+  assert.deepEqual(assessEmbedding(new Headers({ 'X-Frame-Options': 'SAMEORIGIN' }), target, ours), { status: 'blocked', reason: 'X-Frame-Options' });
+  assert.deepEqual(assessEmbedding(new Headers({ 'Content-Security-Policy': "default-src 'self'; frame-ancestors 'none'" }), target, ours), { status: 'blocked', reason: 'CSP frame-ancestors' });
+  assert.equal(assessEmbedding(new Headers({ 'Content-Security-Policy': `frame-ancestors ${ours}` }), target, ours).status, 'allowed');
+  assert.equal(assessEmbedding(new Headers(), target, ours).status, 'unknown');
 });

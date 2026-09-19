@@ -23,6 +23,7 @@ test('imports and executes a standalone HTML file through the service worker', a
   const project = page.locator('.project-card', { hasText: 'runtime-check' });
   await expect(project).toBeVisible();
   await project.getByRole('button', { name: 'Open' }).click();
+  await expect(page.locator('#viewerMenu')).toBeHidden();
 
   const frame = page.frameLocator('#projectFrame');
   await expect(frame.locator('#rendered')).toHaveText('Imported HTML rendered');
@@ -112,9 +113,9 @@ test('activation cleans legacy shell caches and reports consistent runtime metad
     return { version, databaseVersion, caches: await caches.keys() };
   });
 
-  expect(state.version).toMatchObject({ version: '2.1.0-beta.2', build: '2026-09-18.8', releaseId: '2.1.0-beta.2-2026-09-18.8' });
+  expect(state.version).toMatchObject({ version: '2.1.0-beta.3', build: '2026-09-19.1', releaseId: '2.1.0-beta.3-2026-09-19.1' });
   expect(state.databaseVersion).toBe(2);
-  expect(state.caches).toContain('pro-runner-app-shell-2.1.0-beta.2-2026-09-18.8');
+  expect(state.caches).toContain('pro-runner-app-shell-2.1.0-beta.3-2026-09-19.1');
   expect(state.caches.some((name) => name.startsWith('pro-runner-patch-') || name.startsWith('pro-runner-shell-'))).toBe(false);
 });
 
@@ -135,15 +136,15 @@ test('upgrades from the previously deployed worker without losing browser data',
     expect((await request.post('/__test__/deployment?mode=current')).ok()).toBe(true);
     await page.locator('#settingsButton').click();
     await page.locator('#checkUpdateButton').click();
-    await expect(page.locator('#updateCheckStatus')).toHaveText('Version 2.1.0-beta.2 is ready to install.');
+    await expect(page.locator('#updateCheckStatus')).toHaveText('Version 2.1.0-beta.3 is ready to install.');
     const loaded = page.waitForEvent('load');
     await page.locator('#installUpdateButton').click();
     await loaded;
 
-    await expect(page.locator('#installedVersionValue')).toHaveText('2.1.0-beta.2');
+    await expect(page.locator('#installedVersionValue')).toHaveText('2.1.0-beta.3');
     await expect(page.locator('.project-card', { hasText: 'upgrade-data' })).toBeVisible();
     const cachesAfter = await page.evaluate(() => caches.keys());
-    expect(cachesAfter).toContain('pro-runner-app-shell-2.1.0-beta.2-2026-09-18.8');
+    expect(cachesAfter).toContain('pro-runner-app-shell-2.1.0-beta.3-2026-09-19.1');
     expect(cachesAfter.some((name) => name.startsWith('pro-runner-patch-') || name.startsWith('pro-runner-shell-'))).toBe(false);
   } finally {
     await request.post('/__test__/deployment?mode=current');

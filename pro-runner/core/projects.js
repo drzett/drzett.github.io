@@ -1,4 +1,5 @@
 import { read, readAll, remove, STORES, transactionDone, openDatabase, write, normalizeProject } from './storage.js';
+import { scanWebsiteEmbedding } from './website-scan.js';
 
 export const VIRTUAL_PREFIX = '__site/';
 export const projectKey = (id) => `project:${id}`;
@@ -72,8 +73,8 @@ export async function deleteProject(id) {
 
 export async function createWebsite({ name, url, homeOrder }) {
   const externalUrl = normalizeURL(url); const parsed = new URL(externalUrl);
-  const remoteIconUrl = await discoverWebsiteIcon(externalUrl).catch(() => null);
-  const project = { id: newId(), type: 'website', kind: 'web', name: name?.trim() || parsed.hostname.replace(/^www\./, ''), sourceName: externalUrl, externalUrl, remoteIconUrl, entryPath: parsed.hostname, fileCount: 0, totalBytes: 0, trust: 'external', compatibility: false, debug: false, spaFallback: false, createdAt: Date.now(), importedAt: Date.now(), homeOrder };
+  const [remoteIconUrl, embeddingScan] = await Promise.all([discoverWebsiteIcon(externalUrl).catch(() => null), scanWebsiteEmbedding(externalUrl)]);
+  const project = { id: newId(), type: 'website', kind: 'web', name: name?.trim() || parsed.hostname.replace(/^www\./, ''), sourceName: externalUrl, externalUrl, remoteIconUrl, embeddingScan, websiteLaunchMode: embeddingScan.status === 'blocked' ? 'browser' : 'embedded', entryPath: parsed.hostname, fileCount: 0, totalBytes: 0, trust: 'external', compatibility: false, debug: false, spaFallback: false, createdAt: Date.now(), importedAt: Date.now(), homeOrder };
   await saveProject(project); await cacheWebsiteIcon(project, remoteIconUrl); return project;
 }
 

@@ -46,12 +46,42 @@ test('website entries open in the external viewer without changing their type or
   await seedLegacy(page); await page.goto('./');
   await page.locator('.home-app[data-id="web-1"]').click();
   await expect(page.locator('#viewer')).toBeVisible();
+  await expect(page.locator('#viewerMenu')).toBeHidden();
   await expect(page.locator('#projectFrame')).toHaveAttribute('src', 'https://example.test/app');
   await expect(page.locator('#viewerExternalFallback')).toHaveCount(0);
   await page.locator('#viewerControl').click();
   await expect(page.locator('#viewerBrowser')).toBeVisible();
+  await page.locator('#viewerHome').click();
+  await page.locator('.home-app[data-id="web-1"]').click();
+  await expect(page.locator('#viewerMenu')).toBeHidden();
   const project = await page.evaluate(async () => new Promise((resolve) => { const request = indexedDB.open('pro-runner-v1'); request.onsuccess = () => { const db = request.result; const get = db.transaction('projects').objectStore('projects').get('web-1'); get.onsuccess = () => resolve(get.result); }; }));
   expect(project.type).toBe('website'); expect(project.externalUrl).toBe('https://example.test/app');
+});
+
+test('website library shows launch mode and honest scan status', async ({ page }) => {
+  await seedLegacy(page); await page.goto('./');
+  await page.locator('.home-app[data-runner="true"]').click();
+  await expect(page.locator('.project-card[data-id="web-1"] .website-library-meta')).toContainText('In Pro Runner');
+  await expect(page.locator('.project-card[data-id="web-1"] .website-library-meta')).toContainText('Embedding not verifiable');
+});
+
+test('a readable blocking policy selects browser mode when adding a website', async ({ page }) => {
+  await page.route('https://blocked.test/**', (route) => {
+    if (route.request().method() === 'HEAD') return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'content-security-policy', 'content-security-policy': "frame-ancestors 'none'" } });
+    return route.abort();
+  });
+  await page.route('https://www.google.com/s2/**', (route) => route.abort());
+  await page.route('https://icons.duckduckgo.com/**', (route) => route.abort());
+  await page.goto('./');
+  await page.locator('#importWebsiteButton').click();
+  await page.locator('#websiteShortcutURL').fill('https://blocked.test/app');
+  await page.locator('.website-save').click();
+  const card = page.locator('.project-card', { hasText: 'blocked.test' });
+  await expect(card).toBeVisible();
+  await expect(card.locator('.website-library-meta')).toContainText('Browser');
+  await expect(card.locator('.website-library-meta')).toContainText('Embedding blocked');
+  await card.getByRole('button', { name: 'Settings' }).click();
+  await expect(page.locator('#websiteLaunchMode')).toHaveValue('browser');
 });
 
 test('a dock item can return to a visible grid slot during edit mode', async ({ page }) => {

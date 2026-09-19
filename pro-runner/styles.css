@@ -99,6 +99,9 @@ button, [role="button"] { -webkit-tap-highlight-color: transparent; }
 .project-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 15px; }
 .meta-chip { border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 5px 8px; font-size: 9px; color: var(--muted); background: rgba(0,0,0,.12); }
 .project-actions { display: flex; gap: 8px; margin-top: 16px; }
+.website-library-meta { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin-top:12px; color:var(--muted); font-size:10px; line-height:1.35; }
+.website-mode-badge { border-radius:999px; padding:3px 7px; background:rgba(255,255,255,.09); color:var(--text); white-space:nowrap; }
+.website-scan-note { margin:-6px 0 0; color:var(--muted); font-size:10px; line-height:1.45; }
 .project-actions button { flex: 1; border-radius: 11px; border: 1px solid var(--line); background: rgba(255,255,255,.055); padding: 8px 10px; cursor: pointer; font-size: 11px; }
 .project-actions button.primary-mini { background: var(--text); color: #111214; border-color: transparent; font-weight: 700; }
 .capability-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
